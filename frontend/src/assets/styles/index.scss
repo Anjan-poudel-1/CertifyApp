@@ -1,0 +1,16 @@
+// Import abstracts
+@import "./abstracts/variables", "./abstracts/mixins";
+
+//Vendors import
+@import "./vendors/bootstrap", "./vendors/toast";
+
+//Base import
+@import "./base/base";
+
+// Import components
+@import "./components/buttons", "./components/loading", "./components/navbar",
+    "./components/notice", "./components/wallet-not-found",
+    "./components/account-dropdown";
+
+// Import pages
+@import "./pages/home", "./pages/login", "./pages/verify-certificate";

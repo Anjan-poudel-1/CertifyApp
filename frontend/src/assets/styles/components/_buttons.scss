@@ -1,0 +1,27 @@
+.btn {
+    outline: none;
+    border: none;
+
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: 0.2s ease-in-out;
+}
+
+.btn-primary {
+    background-color: $primary-btn-color;
+    color: white;
+}
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+    background-color: $primary-btn-hover-color !important;
+}
+.btn-secondary {
+}
+
+.btn-full {
+    width: 100%;
+}

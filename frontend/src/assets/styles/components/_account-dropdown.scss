@@ -1,0 +1,35 @@
+.account-dropdown {
+    position: absolute;
+    margin-top: 1rem;
+    z-index: 990;
+    border: 1px solid #ccc;
+    width: 200px;
+    border-radius: 8px;
+    font-size: $font-size-sm;
+    right: 0;
+    background-color: $background-color;
+    padding: 0.75rem 0rem;
+    &__list {
+        padding: 0.25rem 0.75rem;
+        display: flex;
+        gap: 0.5rem;
+        align-items: end;
+        &__svg {
+        }
+
+        &__data {
+        }
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        &:hover {
+            background-color: #ededed;
+        }
+    }
+    max-height: 0;
+    overflow: hidden;
+    visibility: hidden;
+    &--show {
+        visibility: visible;
+        max-height: 300px;
+    }
+}

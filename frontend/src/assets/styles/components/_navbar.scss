@@ -1,0 +1,68 @@
+.navbar {
+    position: fixed;
+    width: 100%;
+    padding: 0 0 1rem 0;
+    border-bottom: 1px solid #ccc;
+    background-color: $background-color;
+    z-index: 999;
+
+    &__left {
+        &__logo {
+            width: 180px;
+            img {
+                width: 100%;
+            }
+        }
+
+        &__links {
+        }
+    }
+
+    &__right {
+        &__wallet-container {
+            position: relative;
+        }
+        &__wallet {
+            padding: 0.25rem 1rem;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            cursor: pointer;
+
+            &__icon {
+                display: flex;
+                align-items: center;
+                svg {
+                    height: 18px;
+                }
+            }
+
+            &__address {
+                font-size: $font-size-sm;
+                font-weight: 600;
+            }
+        }
+    }
+}
+
+.navbar-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding-top: 1rem;
+}
+
+.incorrect-chain {
+    top: 0;
+    left: 0;
+    color: white;
+    font-weight: 600;
+    background-color: $secondary-color;
+    text-align: center;
+    padding: 0.5rem;
+    width: 100%;
+    z-index: 999;
+}

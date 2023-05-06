@@ -1,0 +1,10 @@
+.wallet-not-connected,
+.wallet-not-found {
+    padding: 1.5rem 0;
+
+    &__heading {
+        font-size: $font-size-md;
+        font-weight: 600;
+        margin: 1rem;
+    }
+}
