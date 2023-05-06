@@ -7,10 +7,10 @@
 //Base import
 @import "./base/base";
 
+// Import pages
+@import "./pages/home", "./pages/login", "./pages/verify-certificate";
+
 // Import components
 @import "./components/buttons", "./components/loading", "./components/navbar",
     "./components/notice", "./components/wallet-not-found",
     "./components/account-dropdown";
-
-// Import pages
-@import "./pages/home", "./pages/login", "./pages/verify-certificate";
