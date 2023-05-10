@@ -4,6 +4,9 @@ const bodyParser = require("body-parser");
 const User = require("./models/UserModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const cors = require("cors");
+
+require("dotenv").config();
 
 const app = express();
 
@@ -11,6 +14,7 @@ const Student = require("./models/StudentModel");
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(cors());
 
 // Routes
 app.get("/", (req, res) => {
@@ -138,23 +142,30 @@ app.put("/students/:studentId", async (req, res) => {
 
 app.post("/login", async (req, res) => {
     const { email, password } = req.body;
-
+    res.setHeader("Content-Type", "application/json");
     // Check if the email and password are valid
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).populate("student");
     if (!user) {
-        return res.status(401).json({ message: "Invalid email or password" });
+        return res.status(401).json({
+            message: "Invalid email or password",
+            errors: { email: "User not found " },
+        });
     }
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
-        return res.status(401).json({ message: "Invalid email or password" });
+        return res.status(401).json({
+            message: "Invalid email or password",
+            errors: { password: "Password didnot match" },
+        });
     }
 
     // If the email and password are valid, generate a JWT token and return it
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ userId: user.userId }, process.env.JWT_SECRET, {
         // expiresIn: "1h",
-        expiresIn: null,
+        expiresIn: "3d",
     });
-    res.status(200).json({ token });
+
+    res.status(200).json({ token, user });
 });
 
 mongoose

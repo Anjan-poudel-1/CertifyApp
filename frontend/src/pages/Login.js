@@ -1,22 +1,71 @@
 import React, { useState } from "react";
 import NavBar from "../components/NavBar";
-import { Button } from "react-bootstrap";
+import { Button, Toast } from "react-bootstrap";
 import FloatingLabel from "react-bootstrap/FloatingLabel";
 import Form from "react-bootstrap/Form";
 import { Link } from "react-router-dom";
+import { checkLoginFormError } from "../helpers/errors";
+import isEmpty from "../helpers/isEmpty";
+import { userLogin } from "../apis/Public/login";
+import { toast } from "react-toastify";
+import { useEth } from "../contexts/EthContext";
+import { reducer, actions, initialState } from "../contexts/EthContext/state";
+import { useNavigate } from "react-router";
+
 function Login() {
     const [initialLoginValues, setInitialLoginValues] = useState({
         email: "",
         password: "",
     });
-
+    const { state, dispatch } = useEth();
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Form submitted");
+        console.log("initialLoginValues", initialLoginValues);
+        let _errors = checkLoginFormError(initialLoginValues);
+        setErrors(_errors);
+
+        if (isEmpty(_errors)) {
+            setLoading(true);
+            const controller = new AbortController();
+            await userLogin({ ...initialLoginValues }, "", controller.signal)
+                .then((res) => {
+                    console.log(res);
+                    if (res.response.ok) {
+                        toast.success("Log in successful");
+                        let toSaveLocal = {
+                            ...res.json,
+                            isLoggedIn: true,
+                        };
+                        localStorage.setItem(
+                            "certify",
+                            JSON.stringify(toSaveLocal)
+                        );
+                        dispatch({
+                            type: actions.setUserState,
+                            data: {
+                                toSaveLocal,
+                            },
+                        });
+                        navigate(0);
+                    } else {
+                        toast.error(res.json.message);
+                        setErrors({ ...res.json.errors });
+                    }
+                })
+                .catch((err) => {
+                    console.log(err);
+                })
+                .finally(() => {
+                    setLoading(false);
+                });
+            return () => controller.abort();
+        }
     };
+
+    const navigate = useNavigate();
 
     return (
         <div className=" absolute-center-page">

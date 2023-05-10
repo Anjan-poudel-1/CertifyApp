@@ -10,7 +10,8 @@ function NavBar({}) {
     const [openAccounts, setOpenAccounts] = useState(false);
 
     const { state, dispatch } = useEth();
-    console.log(dispatch);
+
+    console.log(state);
     const walletClicked = () => {
         console.log("WAllet clicked");
         console.log(state);
