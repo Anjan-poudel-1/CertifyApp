@@ -8,13 +8,13 @@ body {
     background-color: $background-color;
     color: $font-color-primary;
     font-size: $font-size-base;
-    width: 100vw;
 }
 
 .page {
     min-height: 100vh;
     margin: 0 auto;
     padding-top: 9rem;
+    overflow-x: hidden;
 
     @include media-breakpoint-down(sm) {
         padding: 1.5rem 0;

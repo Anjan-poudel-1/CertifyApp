@@ -16,6 +16,7 @@ import {
 import Login from "./pages/Login";
 import NavBar from "./components/NavBar";
 import VerifyCertificate from "./pages/VerifyCertificate";
+import Dashboard from "./pages/Admin/Dashboard";
 
 function App() {
     const { state, dispatch } = useEth();
@@ -55,6 +56,7 @@ function App() {
                     path="/verify-certificate"
                     element={<VerifyCertificate />}
                 />
+                <Route path="/dashboard" element={<Dashboard />} />
             </Routes>
         </>
     );
