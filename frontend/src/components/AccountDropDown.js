@@ -1,6 +1,29 @@
 import React from "react";
-
-function AccountDropDown({ show }) {
+import { useEth } from "../contexts/EthContext";
+import { reducer, actions, initialState } from "../contexts/EthContext/state";
+import { toast } from "react-toastify";
+function AccountDropDown({ show, setShow, data }) {
+    const { state, dispatch } = useEth();
+    const copyAddress = (textToCopy) => {
+        navigator.clipboard
+            .writeText(textToCopy)
+            .then(() => {
+                console.log("Text copied to clipboard");
+                toast.success("Address Copied Successfully");
+            })
+            .catch((error) => {
+                console.error("Error copying text: ", error);
+            });
+    };
+    const logout = () => {
+        localStorage.setItem("certify", JSON.stringify({}));
+        dispatch({
+            type: actions.setUserState,
+            data: {},
+        });
+        setShow(false);
+        toast.success("Logged out successfully");
+    };
     return (
         <div
             className={`account-dropdown ${
@@ -20,7 +43,7 @@ function AccountDropDown({ show }) {
                         <path d="M4.103 45.367l-4 12A2.001 2.001 0 0 0 2 60h60c.643 0 1.247-.309 1.622-.831a1.997 1.997 0 0 0 .275-1.802l-4-12a2.001 2.001 0 0 0-1.348-1.29l-14-4a1.991 1.991 0 0 0-1.444.134L32 45.764l-11.105-5.553a1.996 1.996 0 0 0-1.444-.134l-14 4a2 2 0 0 0-1.348 1.29zm15.699-1.23l11.304 5.652a2.004 2.004 0 0 0 1.789 0l11.304-5.652 12.238 3.496L59.226 56H4.774l2.789-8.367 12.239-3.496z"></path>
                     </svg>
                 </div>
-                <div className="account-dropdown__list__data">Anjan Poudel</div>
+                <div className="account-dropdown__list__data">{data.name}</div>
             </div>
             <div className="account-dropdown__list">
                 <div className="account-dropdown__list__svg">
@@ -38,7 +61,10 @@ function AccountDropDown({ show }) {
                     Account Settings
                 </div>
             </div>
-            <div className="account-dropdown__list">
+            <div
+                className="account-dropdown__list"
+                onClick={() => copyAddress(data.walletAddress)}
+            >
                 <div className="account-dropdown__list__svg">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -74,8 +100,27 @@ function AccountDropDown({ show }) {
                     </svg>
                 </div>
                 <div className="account-dropdown__list__data">
-                    0X98129012912012...
+                    {data.walletAddress.trim().slice(0, 15)}...
                 </div>
+            </div>
+
+            <div
+                className="account-dropdown__list account-dropdown__list--last"
+                onClick={logout}
+            >
+                <div className="account-dropdown__list__svg">
+                    <svg
+                        width="18"
+                        height="18"
+                        data-name="Layer 1"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 16 16"
+                    >
+                        <path d="M10.95 15.84h-11V.17h11v3.88h-1V1.17h-9v13.67h9v-2.83h1v3.83z" />
+                        <path d="M5 8h6v1H5zM11 5.96l4.4 2.54-4.4 2.54V5.96z" />
+                    </svg>
+                </div>
+                <div className="account-dropdown__list__data">Logout</div>
             </div>
         </div>
     );

@@ -7,6 +7,9 @@
     z-index: 999;
 
     &__left {
+        display: flex;
+        align-items: center;
+        gap: 4rem;
         &__logo {
             width: 180px;
             img {
@@ -15,6 +18,9 @@
         }
 
         &__links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
         }
     }
 
