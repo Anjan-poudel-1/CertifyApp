@@ -59,7 +59,10 @@ function NavBar({}) {
                         state.userState.isLoggedIn &&
                         state.userState.user.isAdmin && (
                             <div className="navbar__left__links">
-                                <Link className="navbar__left__links__link">
+                                <Link
+                                    className="navbar__left__links__link"
+                                    to="/students"
+                                >
                                     Students
                                 </Link>
                                 <div

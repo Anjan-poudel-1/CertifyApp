@@ -22,6 +22,7 @@ import Dashboard from "./pages/Admin/Dashboard";
 import Home from "./pages/Home";
 import LoadingPage from "./pages/LoadingPage";
 import NotFound from "./pages/NotFound";
+import Students from "./pages/Admin/Students/Students";
 
 function App() {
     const { state, dispatch } = useEth();
@@ -109,6 +110,7 @@ function App() {
                         )
                     }
                 />
+                <Route path="/students" element={<Students />} />
                 <Route
                     path="/verify-certificate"
                     element={<VerifyCertificate />}
