@@ -92,18 +92,20 @@ function NavBar({}) {
                 <div className="navbar__right">
                     {/* If account logged in , show profile else show wallet address */}
                     <div className="navbar__right__wallet-container">
-                        <div
-                            className="navbar__right__wallet"
-                            onClick={walletClicked}
-                        >
-                            <div className="navbar__right__wallet__icon">
-                                <WalletSVG />
+                        {state && state.accounts && (
+                            <div
+                                className="navbar__right__wallet"
+                                onClick={walletClicked}
+                            >
+                                <div className="navbar__right__wallet__icon">
+                                    <WalletSVG />
+                                </div>
+                                <div className="navbar__right__wallet__address">
+                                    <>{state.accounts.slice(0, 4)}</>.....
+                                    <>{state.accounts.slice(-4)}</>
+                                </div>
                             </div>
-                            <div className="navbar__right__wallet__address">
-                                <>{state.accounts.slice(0, 4)}</>.....
-                                <>{state.accounts.slice(-4)}</>
-                            </div>
-                        </div>
+                        )}
                         {state &&
                             state.userState &&
                             state.userState.isLoggedIn && (

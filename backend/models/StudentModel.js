@@ -13,6 +13,24 @@ const studentSchema = mongoose.Schema(
             type: Boolean,
             default: false,
         },
+        results: [
+            {
+                year: Number,
+                subjects: [
+                    {
+                        subject: {
+                            type: mongoose.Schema.Types.ObjectId,
+                            ref: "Subject",
+                        },
+                        marks: { type: Number },
+                    },
+                ],
+            },
+        ],
+        certificate: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Certificate",
+        },
     },
     {
         timestamps: true,
@@ -41,3 +59,21 @@ studentSchema.pre("save", async function (next) {
 const Student = mongoose.model("Student", studentSchema);
 
 module.exports = Student;
+
+// Example of adding result in postman
+
+// results: [
+//     {
+//         year: 2020,
+//         subjects: [
+//             {
+//                 subject: ObjectId("5f423423421134f3e24324"),   // Subject ID
+//                 marks: 85
+//             },
+//             {
+//                 subject: ObjectId("5f423345325235f3e7653e"),
+//                 marks: 90
+//             }
+//         ]
+//     }
+// ]
