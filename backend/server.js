@@ -6,7 +6,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const nodemailer = require("nodemailer");
-
+const crypto = require("crypto");
 require("dotenv").config();
 
 const app = express();
@@ -18,6 +18,18 @@ const Program = require("./models/ProgramModel");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cors());
+
+function generateRandomString(length) {
+    const characters =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const randomBytes = crypto.randomBytes(length);
+    const result = new Array(length);
+    for (let i = 0; i < length; i++) {
+        const index = randomBytes[i] % characters.length;
+        result[i] = characters[index];
+    }
+    return result.join("");
+}
 
 let transporter = nodemailer.createTransport({
     host: "smtp.gmail.com", // replace with your SMTP server hostname
@@ -45,7 +57,8 @@ app.post("/users", async (req, res) => {
             });
             savedStudent = await newStudent.save();
         }
-        const hashedPassword = await bcrypt.hash(req.body.password, 10);
+        let password = generateRandomString(8);
+        const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({
             name: req.body.name,
             email: req.body.email,
@@ -59,8 +72,8 @@ app.post("/users", async (req, res) => {
         let message = {
             from: "certifyapp092@gmail.com", // replace with sender email address
             to: "panjan19@tbc.edu.np", // replace with recipient email address
-            subject: "Test email", // replace with subject of the email
-            text: "This is a test email sent from Node.js localhost", // replace with body of the email
+            subject: "Student Registration Successful", // replace with subject of the email
+            text: `You have been registered as an Student. Do not forget to change your password after you have logged in!! Here is the password ${password}`, // replace with body of the email
         };
         transporter.sendMail(message, (err, info) => {
             if (err) {
