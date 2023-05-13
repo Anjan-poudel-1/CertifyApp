@@ -4,7 +4,7 @@ import { publicRequest } from "../base";
 export const fetchStudentData = async (data, query, signal) => {
     try {
         return await publicRequest(
-            `/students${query && query}`,
+            `users${query && query}`,
             "GET",
             data,
             signal

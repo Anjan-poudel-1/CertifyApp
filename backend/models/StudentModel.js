@@ -9,6 +9,10 @@ const studentSchema = mongoose.Schema(
             required: [true, "Provide student enrolled Year"],
             default: 2020,
         },
+        enrolledProgram: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Program",
+        },
         isGraduated: {
             type: Boolean,
             default: false,

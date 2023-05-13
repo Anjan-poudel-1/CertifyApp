@@ -5,6 +5,7 @@ const User = require("./models/UserModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
+const nodemailer = require("nodemailer");
 
 require("dotenv").config();
 
@@ -17,6 +18,16 @@ const Program = require("./models/ProgramModel");
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cors());
+
+let transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com", // replace with your SMTP server hostname
+    port: 587, // replace with your SMTP server port
+    secure: false, // upgrade later with STARTTLS
+    auth: {
+        user: "certifyapp092@gmail.com", // replace with your SMTP server username
+        pass: `${process.env.EMAIL_PASSWORD}`, // replace with your SMTP server password
+    },
+});
 
 // Routes
 app.get("/", (req, res) => {
@@ -45,7 +56,19 @@ app.post("/users", async (req, res) => {
         });
         const savedUser = await newUser.save();
         const populatedUser = await savedUser.populate("student");
-
+        let message = {
+            from: "certifyapp092@gmail.com", // replace with sender email address
+            to: "panjan19@tbc.edu.np", // replace with recipient email address
+            subject: "Test email", // replace with subject of the email
+            text: "This is a test email sent from Node.js localhost", // replace with body of the email
+        };
+        transporter.sendMail(message, (err, info) => {
+            if (err) {
+                console.log(`Error occurred: ${err.message}`);
+                return;
+            }
+            console.log(`Email sent: ${info.messageId}`);
+        });
         res.status(200).json(populatedUser);
     } catch (err) {
         console.log(err);
