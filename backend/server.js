@@ -12,8 +12,11 @@ require("dotenv").config();
 const app = express();
 
 const Student = require("./models/StudentModel");
-const Subject = require("./models/SubjectModel");
-const Program = require("./models/ProgramModel");
+
+const certificateRoutes = require("./routes/certificateRoutes");
+const programRoutes = require("./routes/programRoutes");
+const studentRoutes = require("./routes/studentRoutes");
+const subjectRoutes = require("./routes/subjectRoutes");
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -206,125 +209,9 @@ app.post("/login", async (req, res) => {
     res.status(200).json({ token, user });
 });
 
-// Create a subject
-app.post("/subjects", async (req, res) => {
-    try {
-        const newSubject = new Subject(req.body);
-        const savedSubject = await newSubject.save();
-        res.status(200).json(savedSubject);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-});
-
-// all subjects
-app.get("/subjects", async (req, res) => {
-    try {
-        const subjects = await Subject.find({});
-        res.status(200).json(subjects);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-});
-
-//get specific by id
-app.get("/subjects/:id", async (req, res) => {
-    try {
-        const subject = await Subject.findById(req.params.id);
-        res.status(200).json(subject);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-});
-
-//   update subject
-app.put("/subjects/:id", async (req, res) => {
-    try {
-        const updatedSubject = await Subject.findByIdAndUpdate(
-            req.params.id,
-            req.body,
-            { new: true }
-        );
-        res.status(200).json(updatedSubject);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-});
-
-// delete subjects
-app.delete("/subjects/:id", async (req, res) => {
-    try {
-        await Subject.findByIdAndDelete(req.params.id);
-        res.status(200).json({ message: "Subject deleted" });
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-});
-
-// Programs
-
-// Create a program
-app.post("/programs", async (req, res) => {
-    try {
-        const newProgram = new Program(req.body);
-        const savedProgram = await newProgram.save();
-
-        const populatedProgram = await Program.populate(
-            savedProgram,
-            "years.subjects"
-        );
-
-        res.status(200).json(populatedProgram);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-});
-
-// Get all programs
-app.get("/programs", async (req, res) => {
-    try {
-        const programs = await Program.find({}).populate("years.subjects");
-        res.status(200).json(programs);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-});
-
-// Get specific program by id
-app.get("/programs/:id", async (req, res) => {
-    try {
-        const program = await Program.findById(req.params.id).populate(
-            "years.subjects"
-        );
-        res.status(200).json(program);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-});
-
-// Update program
-app.put("/programs/:id", async (req, res) => {
-    try {
-        const updatedProgram = await Program.findByIdAndUpdate(
-            req.params.id,
-            req.body,
-            { new: true }
-        );
-        res.status(200).json(updatedProgram);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-});
-
-// Delete program
-app.delete("/programs/:id", async (req, res) => {
-    try {
-        await Program.findByIdAndDelete(req.params.id);
-        res.status(200).json({ message: "Program deleted" });
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-});
+app.use("/programs", programRoutes);
+app.use("/subjects", subjectRoutes);
+app.use("/certificates", certificateRoutes);
 
 mongoose
     .connect("mongodb://localhost:27017/Certify")

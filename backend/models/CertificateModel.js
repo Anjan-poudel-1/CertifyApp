@@ -1,11 +1,32 @@
 const mongoose = require("mongoose");
 
-const certificateSchema = mongoose.Schema({
-    certificateId: { type: String, unique: true },
-    student: { type: mongoose.Schema.Types.ObjectId, ref: "Student" },
-    issueDate: { type: Date, default: Date.now },
-    finalPercentage: { type: Number, required: true },
-    certificateURL: { type: String }, // URL of the certificate image
-});
+const certificateSchema = mongoose.Schema(
+    {
+        _id: mongoose.Schema.Types.ObjectId,
+        image: {
+            type: String,
+            required: true,
+        },
+        student: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Student",
+            required: true,
+        },
+        dateGenerated: {
+            type: Date,
+            required: true,
+            default: Date.now,
+        },
+        finalPercentage: {
+            type: Number,
+            required: true,
+        },
+    },
+    {
+        timestamps: true,
+    }
+);
 
 const Certificate = mongoose.model("Certificate", certificateSchema);
+
+module.exports = Certificate;
