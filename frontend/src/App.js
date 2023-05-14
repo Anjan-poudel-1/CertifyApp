@@ -23,7 +23,9 @@ import Home from "./pages/Home";
 import LoadingPage from "./pages/LoadingPage";
 import NotFound from "./pages/NotFound";
 import Students from "./pages/Admin/Students/Students";
-import Create from "./pages/Admin/Students/Create";
+import StudentCreate from "./pages/Admin/Students/Create";
+import SubjectCreate from "./pages/Admin/Subjects/Create";
+import Subjects from "./pages/Admin/Subjects/Subjects";
 
 function App() {
     const { state, dispatch } = useEth();
@@ -111,8 +113,17 @@ function App() {
                         )
                     }
                 />
+
                 <Route path="/students" element={<Students />} />
-                <Route path="/students/add" element={<Create />} />
+                <Route path="/students/add" element={<StudentCreate />} />
+
+                <Route path="/subjects" element={<Subjects />} />
+                <Route path="/subjects/add" element={<SubjectCreate />} />
+                <Route
+                    path="/subjects/:id"
+                    element={<SubjectCreate update={true} />}
+                />
+
                 <Route
                     path="/verify-certificate"
                     element={<VerifyCertificate />}

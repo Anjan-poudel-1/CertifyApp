@@ -12,6 +12,9 @@ const subjectSchema = mongoose.Schema(
             type: String,
             unique: true,
         },
+        creditHours: {
+            type: Number,
+        },
         description: {
             type: String,
         },

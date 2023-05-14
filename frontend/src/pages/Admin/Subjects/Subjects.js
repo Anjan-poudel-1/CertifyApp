@@ -2,21 +2,24 @@ import React, { useState, useEffect } from "react";
 import { Row, Col, Card, Table, Image } from "react-bootstrap";
 import { fetchStudentData } from "../../../apis/Private/students";
 import { useNavigate } from "react-router";
+import {
+    fetchSubjectData,
+    updateExistingSubject,
+} from "../../../apis/Private/subjects";
+import { toast } from "react-toastify";
 
-function Students() {
+function Subjects() {
     const [loading, setLoading] = useState(false);
-    const [studentData, setStudentData] = useState([]);
+    const [subjectData, setSubjectData] = useState([]);
 
     useEffect(() => {
         setLoading(true);
         const controller = new AbortController();
-        fetchStudentData(null, "", controller.signal)
+        fetchSubjectData(null, "", controller.signal)
             .then((res) => {
                 if (res.response.ok) {
                     let tempUsers = [...res.json];
-                    tempUsers = tempUsers.filter((_data) => !_data.isAdmin);
-
-                    setStudentData(tempUsers);
+                    setSubjectData(tempUsers);
                 }
             })
             .catch((err) => {})
@@ -26,21 +29,42 @@ function Students() {
         return () => controller.abort();
     }, []);
 
+    const deleteData = async (_data) => {
+        const controller = new AbortController();
+        await updateExistingSubject(
+            { ..._data, isActive: !_data.isActive },
+            `/${_data._id}`,
+            controller.signal
+        )
+            .then((res) => {
+                if (res.response.ok) {
+                    toast.success("Data Updated Successfully");
+                    window.location.reload();
+                } else {
+                    toast.error("Couldnot Update Data");
+                }
+            })
+            .catch((err) => {})
+            .finally(() => {});
+    };
+
     const navigate = useNavigate();
 
-    const ItemList = studentData.map((_data, index) => {
+    const ItemList = subjectData.map((_data, index) => {
         return (
             <tr key={index}>
                 <th scope="row">{index + 1}</th>
                 <td>{_data.name}</td>
-                <td>{_data.student.studentId}</td>
-                <td>{_data.email}</td>
-                <td>{_data.student.enrolledProgram}</td>
-                <td>{_data.student.enrolledYear}</td>
-                <td>{_data.student.isGraduated.toString()}</td>
+                <td>{_data.subjectCode}</td>
+                <td>{_data.creditHours}</td>
+                <td>{_data.description}</td>
+                <td>{_data.isActive.toString()}</td>
                 <td>
                     <div style={{ display: "flex", gap: "1rem" }}>
-                        <div style={{ cursor: "pointer" }}>
+                        <div
+                            style={{ cursor: "pointer" }}
+                            onClick={() => navigate(`/subjects/${_data._id}`)}
+                        >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 enable-background="new 0 0 32 32"
@@ -54,7 +78,10 @@ function Students() {
                                 <path d="M30,14.5c-0.82861,0-1.5,0.67188-1.5,1.5v10c0,1.37891-1.12158,2.5-2.5,2.5H6c-1.37842,0-2.5-1.12109-2.5-2.5V6c0-1.37891,1.12158-2.5,2.5-2.5h10c0.82861,0,1.5-0.67188,1.5-1.5S16.82861,0.5,16,0.5H6C2.96729,0.5,0.5,2.96777,0.5,6v20c0,3.03223,2.46729,5.5,5.5,5.5h20c3.03271,0,5.5-2.46777,5.5-5.5V16C31.5,15.17188,30.82861,14.5,30,14.5z"></path>
                             </svg>
                         </div>
-                        <div style={{ cursor: "pointer" }}>
+                        <div
+                            style={{ cursor: "pointer" }}
+                            onClick={() => deleteData(_data)}
+                        >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 id="delete"
@@ -91,13 +118,13 @@ function Students() {
                     justifyContent: "space-between",
                 }}
             >
-                <div className="page-header__title">Students</div>
+                <div className="page-header__title">Subjects</div>
                 <div>
                     <button
                         className={`btn btn-primary btn-sm`}
                         type="submit"
                         disabled={loading}
-                        onClick={() => navigate("/students/add")}
+                        onClick={() => navigate("/subjects/add")}
                     >
                         Add new
                     </button>
@@ -111,12 +138,11 @@ function Students() {
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Name</th>
-                                        <th>Student Id</th>
-                                        <th>Email</th>
-                                        <th>Enrolled Program</th>
-                                        <th>Enrolled Year</th>
-                                        <th>Is Graduated</th>
+                                        <th>Subject Name</th>
+                                        <th>Subject Code</th>
+                                        <th>Credit Hours</th>
+                                        <th>Description</th>
+                                        <th>Is Active</th>
                                         <th></th>
                                     </tr>
                                 </thead>
@@ -130,4 +156,4 @@ function Students() {
     );
 }
 
-export default Students;
+export default Subjects;

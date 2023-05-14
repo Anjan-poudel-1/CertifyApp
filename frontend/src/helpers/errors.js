@@ -17,3 +17,21 @@ export const checkLoginFormError = (_data) => {
 
     return errors;
 };
+
+export const checkSubjectFormError = (_data) => {
+    let errors = {};
+
+    if (_data.name.length <= 0) {
+        errors.name = "Please Provide Subject Name";
+    }
+    if (
+        !_data.creditHours ||
+        (_data.creditHours && parseInt(_data.creditHours) <= 0)
+    ) {
+        errors.creditHours = "Please Provide a valid Credit Hour";
+    }
+
+    console.log("ERRORS", errors);
+
+    return errors;
+};
