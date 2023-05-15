@@ -20,6 +20,10 @@ const programSchema = mongoose.Schema(
                 ],
             },
         ],
+        programLeader: {
+            type: String,
+            required: true,
+        },
         isActive: {
             type: Boolean,
             default: true,

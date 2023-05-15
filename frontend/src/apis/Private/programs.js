@@ -25,3 +25,16 @@ export const addNewProgram = async (data, query, signal) => {
         throw err;
     }
 };
+
+export const updateExistingProgram = async (data, query, signal) => {
+    try {
+        return await publicRequest(
+            `programs${query && query}`,
+            "PUT",
+            data,
+            signal
+        );
+    } catch (err) {
+        throw err;
+    }
+};

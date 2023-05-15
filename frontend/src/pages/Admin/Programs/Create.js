@@ -80,7 +80,23 @@ function Create(props) {
         await fetchProgramsData(null, `/${_id}`, controller.signal)
             .then((res) => {
                 if (res.response.ok) {
-                    setProgramsData(res.json);
+                    let newYears = [];
+                    res.json.years.map((_dat, index) => {
+                        let tempData = [];
+                        _dat.subjects.map((_d) => {
+                            tempData = [
+                                ...tempData,
+                                { label: _d.name, value: _d.id, id: _d.id },
+                            ];
+                        });
+                        newYears = [...newYears, tempData];
+                    });
+                    setProgramsData({
+                        name: res.json.name,
+                        description: res.json.description,
+                        programLeader: res.json.programLeader,
+                        years: [...newYears],
+                    });
                 } else {
                     toast.error("Unable to fetch Programs data");
                     navigate("/programs");
@@ -188,7 +204,10 @@ function Create(props) {
                     justifyContent: "space-between",
                 }}
             >
-                <div className="page-header__title">Add Programs</div>
+                <div className="page-header__title">
+                    {" "}
+                    {props.update ? "Update" : "Add"} Program
+                </div>
             </div>
             <Row style={{ margin: "2rem 0 6rem 0" }}>
                 <Col>

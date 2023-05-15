@@ -1,4 +1,5 @@
 import isEmail from "./isEmail";
+import isEmpty from "./isEmpty";
 
 export const checkLoginFormError = (_data) => {
     let errors = {};
@@ -52,5 +53,27 @@ export const checkProgramsFormError = (_data) => {
         errors.years = "Provide Valid Subjects to each year";
     }
 
+    return errors;
+};
+
+export const checkStudentFormError = (_data) => {
+    let errors = {};
+    if (_data.name.length <= 0) {
+        errors.name = "Please Provide Student Name";
+    }
+    if (_data.email.length <= 0 || !isEmail(_data.email)) {
+        errors.email = "Please Provide a valid email";
+    }
+    if (_data.walletAddress.length <= 0) {
+        errors.walletAddress = "Please Provide a valid Wallet";
+    }
+
+    if (_data.enrolledYear.length != 4) {
+        errors.enrolledYear = "Please Provide the year of enrollment";
+    }
+
+    if (isEmpty(_data.enrolledProgram)) {
+        errors.enrolledProgram = "Please Provide the program enrolled";
+    }
     return errors;
 };

@@ -57,6 +57,7 @@ app.post("/users", async (req, res) => {
             const newStudent = new Student({
                 enrolledYear: req.body.enrolledYear,
                 isGraduated: req.body.isGraduated,
+                enrolledProgram: req.body.enrolledProgram,
             });
             savedStudent = await newStudent.save();
         }
@@ -71,12 +72,24 @@ app.post("/users", async (req, res) => {
             student: (savedStudent && savedStudent._id) || null,
         });
         const savedUser = await newUser.save();
-        const populatedUser = await savedUser.populate("student");
+        const populatedUser = await savedUser.populate({
+            path: "student",
+            populate: { path: "enrolledProgram", model: "Program" },
+        });
         let message = {
             from: "certifyapp092@gmail.com", // replace with sender email address
             to: "panjan19@tbc.edu.np", // replace with recipient email address
             subject: "Student Registration Successful", // replace with subject of the email
-            text: `You have been registered as an Student. Do not forget to change your password after you have logged in!! Here is the password ${password}`, // replace with body of the email
+            html: `
+        <div>
+            <h1>Welcome to CertifyApp!</h1>
+            <p>Dear Student,</p>
+            <p>We are glad to inform you that your registration as a student has been successful. Here is your temporary password:</p>
+            <p><strong>${password}</strong></p>
+            <p>Please remember to change your password after you have logged in for the first time.</p>
+            <hr>
+            <p style="color: red;"><strong>Warning:</strong> For your account security, it is important to change your password as soon as possible.</p>
+        </div>`,
         };
         transporter.sendMail(message, (err, info) => {
             if (err) {
@@ -95,7 +108,12 @@ app.post("/users", async (req, res) => {
 // Fetch Users
 app.get("/users", async (req, res) => {
     try {
-        const usersData = await User.find({}).populate("student", "-_id -__v");
+        const usersData = await User.find({}).populate({
+            path: "student",
+            populate: {
+                path: "enrolledProgram",
+            },
+        });
         res.status(200).json(usersData);
     } catch (err) {
         console.log(err);

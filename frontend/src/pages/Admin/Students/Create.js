@@ -1,9 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Row, Col, Card, Table, Image } from "react-bootstrap";
-import { fetchStudentData } from "../../../apis/Private/students";
+import {
+    addStudentData,
+    fetchStudentData,
+} from "../../../apis/Private/students";
 import { useNavigate } from "react-router";
 import FloatingLabel from "react-bootstrap/FloatingLabel";
 import Form from "react-bootstrap/Form";
+import { fetchProgramsData } from "../../../apis/Private/programs";
+import { toast } from "react-toastify";
+import { checkStudentFormError } from "../../../helpers/errors";
+import isEmpty from "../../../helpers/isEmpty";
 function Create() {
     const [loading, setLoading] = useState(false);
     const [studentData, setStudentData] = useState({
@@ -14,6 +21,7 @@ function Create() {
         enrolledProgram: "",
     });
 
+    const [programs, setPrograms] = useState([]);
     const [errors, setErrors] = useState({
         name: "",
         email: "",
@@ -25,8 +33,43 @@ function Create() {
     const navigate = useNavigate();
 
     const submitStudentForm = () => {
-        setLoading(true);
+        // setLoading(true);
+        const controller = new AbortController();
+
+        let _errors = checkStudentFormError(studentData);
+
+        setErrors({ ..._errors });
+
+        console.log("errors", _errors);
+
+        console.log("studentData", studentData);
+
+        if (isEmpty(_errors)) {
+            addStudentData(studentData).then((res) => {
+                if (res.response.ok) {
+                    toast.success("Student Added Successfully");
+                    navigate("/students");
+                } else {
+                    toast.error("Could not add the student");
+                }
+            });
+        } else {
+        }
+
+        return () => controller.abort();
     };
+
+    useEffect(() => {
+        const controller = new AbortController();
+        fetchProgramsData(null, "", controller.signal).then((res) => {
+            if (res.response.ok) {
+                setPrograms([...res.json]);
+            } else {
+                toast.error("Could not fetch Programs Data");
+            }
+        });
+        return () => controller.abort();
+    }, []);
 
     return (
         <div className="page container">
@@ -154,6 +197,8 @@ function Create() {
                                             name="enrolledProgram"
                                             value={studentData.enrolledProgram}
                                             onChange={(e) => {
+                                                console.log(e.target.value);
+
                                                 setStudentData({
                                                     ...studentData,
                                                     enrolledProgram:
@@ -165,10 +210,20 @@ function Create() {
                                             <option value="" disabled>
                                                 Choose Program
                                             </option>
-                                            <option value="book">Book</option>
-                                            <option value="others">
-                                                Others
-                                            </option>
+                                            {programs.map((_data, index) => {
+                                                return (
+                                                    <option
+                                                        key={index}
+                                                        value={_data._id}
+                                                        selected={
+                                                            _data._id ==
+                                                            studentData.enrolledProgram
+                                                        }
+                                                    >
+                                                        {_data.name}
+                                                    </option>
+                                                );
+                                            })}
                                         </Form.Control>
                                     </Form.Group>
                                 </Col>
@@ -186,6 +241,7 @@ function Create() {
                                             walletAddress: "",
                                             enrolledYear: "",
                                             enrolledProgram: "",
+                                            email: "",
                                         })
                                     }
                                 >
@@ -196,7 +252,7 @@ function Create() {
                                     className={`btn btn-primary`}
                                     type="submit"
                                     disabled={loading}
-                                    onClick={() => submitStudentForm}
+                                    onClick={() => submitStudentForm()}
                                 >
                                     Submit
                                 </button>

@@ -35,7 +35,10 @@ function Students() {
                 <td>{_data.name}</td>
                 <td>{_data.student.studentId}</td>
                 <td>{_data.email}</td>
-                <td>{_data.student.enrolledProgram}</td>
+                <td>
+                    {_data.student.enrolledProgram &&
+                        _data.student.enrolledProgram.name}
+                </td>
                 <td>{_data.student.enrolledYear}</td>
                 <td>{_data.student.isGraduated.toString()}</td>
                 <td>

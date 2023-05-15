@@ -130,6 +130,10 @@ function App() {
 
                 <Route path="/programs" element={<Programs />} />
                 <Route path="/programs/add" element={<ProgramsCreate />} />
+                <Route
+                    path="/programs/:id"
+                    element={<ProgramsCreate update={true} />}
+                />
 
                 <Route
                     path="/verify-certificate"
