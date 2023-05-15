@@ -35,3 +35,22 @@ export const checkSubjectFormError = (_data) => {
 
     return errors;
 };
+
+export const checkProgramsFormError = (_data) => {
+    let errors = {};
+    if (_data.name.length <= 0) {
+        errors.name = "Please Provide The Program Name";
+    }
+    if (_data.description.length <= 0) {
+        errors.description = "Please Provide The Program Description";
+    }
+    if (_data.programLeader.length <= 0) {
+        errors.programLeader = "Please Provide The Program Leader";
+    }
+
+    if (_data.years.length < 4) {
+        errors.years = "Provide Valid Subjects to each year";
+    }
+
+    return errors;
+};

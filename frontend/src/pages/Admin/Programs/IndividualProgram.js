@@ -1,7 +1,13 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
-function IndividualProgram() {
-    return <div>IndividualProgram</div>;
+function IndividualProgram({
+    index,
+    errors,
+    programsData,
+    CustomSelectMenuList,
+}) {
+    const [subjectSearch, setSubjectSearch] = useState("");
+    return <></>;
 }
 
 export default IndividualProgram;
