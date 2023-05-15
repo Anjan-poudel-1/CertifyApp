@@ -91,12 +91,6 @@ function Create(props) {
     // in request json
     // description: HTMLdescription ? HTMLdescription.toString() : "",
 
-    const [HTMLdescription, setHTMLdescription] = useState();
-
-    const _itemDescriptionChange = (e) => {
-        setHTMLdescription(e);
-    };
-
     const fetchInitialDatas = async (_id) => {
         const controller = new AbortController();
         await fetchSubjectData(null, `/${_id}`, controller.signal)
@@ -109,6 +103,7 @@ function Create(props) {
                 }
             })
             .catch((err) => {});
+        return () => controller.abort();
     };
     useEffect(() => {
         if (props.update) {
@@ -129,7 +124,7 @@ function Create(props) {
             >
                 <div className="page-header__title">Add Subject</div>
             </div>
-            <Row style={{ marginTop: "2rem" }}>
+            <Row style={{ margin: "2rem 0 6rem 0" }}>
                 <Col>
                     <Card>
                         <Card.Body

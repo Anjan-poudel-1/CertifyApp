@@ -25,9 +25,9 @@ function AcademicsDropdown({ show, setShow, data }) {
             </div>
             <div
                 className="account-dropdown__list"
-                onClick={() => moveToPage("modules")}
+                onClick={() => moveToPage("programs")}
             >
-                <div className="account-dropdown__list__data">Modules</div>
+                <div className="account-dropdown__list__data">Programs</div>
             </div>
             <div
                 className="account-dropdown__list"
