@@ -77,3 +77,18 @@ export const checkStudentFormError = (_data) => {
     }
     return errors;
 };
+
+export const checkPasswordFormError = (_data) => {
+    let errors = {};
+    if (_data.current.length <= 0) {
+        errors.current = "Please Provide Current Password";
+    }
+    if (_data.new.length <= 7) {
+        errors.new = "Password must be of at least 8 characteers";
+    }
+    if (!errors.new && _data.new !== _data.confirm) {
+        errors.confirm = "Password does not match";
+    }
+
+    return errors;
+};

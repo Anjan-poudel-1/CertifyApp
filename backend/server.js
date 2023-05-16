@@ -199,6 +199,37 @@ app.put("/students/:studentId", async (req, res) => {
     }
 });
 
+app.put("/users/:id/change-password", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { currentPassword, newPassword } = req.body;
+
+        // Check if the current password is correct
+        const user = await User.findById(id);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        console.log(currentPassword);
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: "Invalid credentials" });
+        }
+
+        // Hash the new password and update the user's password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        await User.findByIdAndUpdate(
+            id,
+            { password: hashedPassword },
+            { new: true }
+        );
+
+        res.status(200).json({ message: "Password updated successfully" });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ message: err.message });
+    }
+});
 app.post("/login", async (req, res) => {
     const { email, password } = req.body;
     res.setHeader("Content-Type", "application/json");

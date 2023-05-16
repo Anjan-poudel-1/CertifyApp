@@ -30,6 +30,7 @@ import ProgramsCreate from "./pages/Admin/Programs/Create";
 
 import Subjects from "./pages/Admin/Subjects/Subjects";
 import Programs from "./pages/Admin/Programs/Programs";
+import AccountSettings from "./pages/AccountSettings";
 
 function App() {
     const { state, dispatch } = useEth();
@@ -139,6 +140,7 @@ function App() {
                     path="/verify-certificate"
                     element={<VerifyCertificate />}
                 />
+                <Route path="/account-settings" element={<AccountSettings />} />
                 <Route path="*" element={<NotFound />} />
             </Routes>
         </>

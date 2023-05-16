@@ -2,7 +2,10 @@ import React from "react";
 import { useEth } from "../contexts/EthContext";
 import { reducer, actions, initialState } from "../contexts/EthContext/state";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router";
+import { Link } from "react-router-dom";
 function AccountDropDown({ show, setShow, data }) {
+    const navigate = useNavigate();
     const { state, dispatch } = useEth();
     const copyAddress = (textToCopy) => {
         navigator.clipboard
@@ -45,7 +48,11 @@ function AccountDropDown({ show, setShow, data }) {
                 </div>
                 <div className="account-dropdown__list__data">{data.name}</div>
             </div>
-            <div className="account-dropdown__list">
+
+            <div
+                className="account-dropdown__list"
+                onClick={() => navigate("/account-settings")}
+            >
                 <div className="account-dropdown__list__svg">
                     <svg
                         width="18"
@@ -61,6 +68,7 @@ function AccountDropDown({ show, setShow, data }) {
                     Account Settings
                 </div>
             </div>
+
             <div
                 className="account-dropdown__list"
                 onClick={() => copyAddress(data.walletAddress)}
