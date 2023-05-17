@@ -272,6 +272,69 @@ app.put("/users/:id/change-password", async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 });
+
+app.post("/students/:studentId/results", async (req, res) => {
+    try {
+        const student = await Student.findById(req.params.studentId);
+        if (!student) {
+            return res.status(404).json({ message: "Student not found" });
+        }
+
+        student.results.push(req.body);
+        await student.save();
+
+        res.status(201).json({
+            message: "Result added successfully",
+            data: student.results[student.results.length - 1],
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+app.get("/students/:studentId/results", async (req, res) => {
+    try {
+        const student = await Student.findById(req.params.studentId);
+        if (!student) {
+            return res.status(404).json({ message: "Student not found" });
+        }
+
+        res.status(200).json({
+            message: "Results fetched successfully",
+            data: student.results,
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+app.put("/students/:studentId/results/:resultId", async (req, res) => {
+    try {
+        const student = await Student.findById(req.params.studentId);
+        if (!student) {
+            return res.status(404).json({ message: "Student not found" });
+        }
+
+        const resultIndex = student.results.findIndex(
+            (result) => result.id === req.params.resultId
+        );
+
+        if (resultIndex === -1) {
+            return res.status(404).json({ message: "Result not found" });
+        }
+
+        student.results[resultIndex] = req.body;
+        await student.save();
+
+        res.status(200).json({
+            message: "Result updated successfully",
+            data: student.results[resultIndex],
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 app.post("/login", async (req, res) => {
     const { email, password } = req.body;
     res.setHeader("Content-Type", "application/json");
