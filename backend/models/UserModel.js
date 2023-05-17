@@ -29,10 +29,15 @@ const userSchema = new mongoose.Schema(
         walletAddress: {
             type: String,
             required: true,
+            unique: true,
         },
         student: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Student",
+        },
+        isActive: {
+            type: Boolean,
+            default: true,
         },
     },
     {

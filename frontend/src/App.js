@@ -25,6 +25,7 @@ import NotFound from "./pages/NotFound";
 import Students from "./pages/Admin/Students/Students";
 
 import StudentCreate from "./pages/Admin/Students/Create";
+import Student from "./pages/Admin/Students/Student";
 import SubjectCreate from "./pages/Admin/Subjects/Create";
 import ProgramsCreate from "./pages/Admin/Programs/Create";
 
@@ -120,7 +121,8 @@ function App() {
                 />
 
                 <Route path="/students" element={<Students />} />
-                <Route path="/students/add" element={<StudentCreate />} />
+                <Route path="/students/add" exact element={<StudentCreate />} />
+                <Route path="/students/:id" element={<Student />} />
 
                 <Route path="/subjects" element={<Subjects />} />
                 <Route path="/subjects/add" element={<SubjectCreate />} />

@@ -61,21 +61,43 @@ app.post("/users", async (req, res) => {
             });
             savedStudent = await newStudent.save();
         }
-        let password = generateRandomString(8);
+        let password = req.body.isAdmin
+            ? req.body.password
+            : generateRandomString(8);
         const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({
-            name: req.body.name,
-            email: req.body.email,
-            password: hashedPassword,
-            isAdmin: req.body.isAdmin,
-            walletAddress: req.body.walletAddress,
-            student: (savedStudent && savedStudent._id) || null,
-        });
+
+        let newUser = null;
+        if (req.body.isAdmin) {
+            newUser = new User({
+                name: req.body.name,
+                email: req.body.email,
+                password: hashedPassword,
+                isAdmin: req.body.isAdmin,
+                walletAddress: req.body.walletAddress,
+            });
+        } else {
+            newUser = new User({
+                name: req.body.name,
+                email: req.body.email,
+                password: hashedPassword,
+                isAdmin: req.body.isAdmin,
+                walletAddress: req.body.walletAddress,
+                student: savedStudent && savedStudent._id,
+            });
+        }
+
+        let populatedUser = null;
+
         const savedUser = await newUser.save();
-        const populatedUser = await savedUser.populate({
-            path: "student",
-            populate: { path: "enrolledProgram", model: "Program" },
-        });
+
+        if (req.body.isAdmin) {
+        } else {
+            populatedUser = await savedUser.populate({
+                path: "student",
+                populate: { path: "enrolledProgram", model: "Program" },
+            });
+        }
+
         let message = {
             from: "certifyapp092@gmail.com", // replace with sender email address
             to: "panjan19@tbc.edu.np", // replace with recipient email address
@@ -85,19 +107,24 @@ app.post("/users", async (req, res) => {
             <h1>Welcome to CertifyApp!</h1>
             <p>Dear Student,</p>
             <p>We are glad to inform you that your registration as a student has been successful. Here is your temporary password:</p>
-            <p><strong>${password}</strong></p>
+            <p><strong>Password: ${password}</strong></p>
+            <p><strong>Registered Wallet Address: ${req.body.walletAddress}</strong></p>
             <p>Please remember to change your password after you have logged in for the first time.</p>
             <hr>
             <p style="color: red;"><strong>Warning:</strong> For your account security, it is important to change your password as soon as possible.</p>
         </div>`,
         };
-        transporter.sendMail(message, (err, info) => {
-            if (err) {
-                console.log(`Error occurred: ${err.message}`);
-                return;
-            }
-            console.log(`Email sent: ${info.messageId}`);
-        });
+
+        if (!req.body.isAdmin) {
+            transporter.sendMail(message, (err, info) => {
+                if (err) {
+                    console.log(`Error occurred: ${err.message}`);
+                    return;
+                }
+                console.log(`Email sent: ${info.messageId}`);
+            });
+        }
+
         res.status(200).json(populatedUser);
     } catch (err) {
         console.log(err);
@@ -121,6 +148,24 @@ app.get("/users", async (req, res) => {
     }
 });
 
+app.put("/users/:id", async (req, res) => {
+    try {
+        const updatedSubject = await User.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true }
+        )
+            .populate({
+                path: "student",
+                populate: { path: "enrolledProgram" },
+            })
+            .exec();
+        res.status(200).json(updatedSubject);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
 // Get user by Id
 app.get("/users/:userId", async (req, res) => {
     try {
@@ -133,7 +178,12 @@ app.get("/users/:userId", async (req, res) => {
         }
         const populatedData = await User.findOne({
             userId: userId,
-        }).populate("student", "-_id -__v");
+        })
+            .populate({
+                path: "student",
+                populate: { path: "enrolledProgram" },
+            })
+            .exec();
         res.status(200).json(populatedData);
     } catch (err) {
         console.log(err);
@@ -142,38 +192,30 @@ app.get("/users/:userId", async (req, res) => {
 });
 
 // Search Student
-app.get("/users", async (req, res) => {
+app.get("/usersearch", async (req, res) => {
     try {
-        const searchQuery = req.query.search;
-        let query = {};
+        const { search } = req.query;
 
-        // If a search query is provided, match on either name or studentId
-        if (searchQuery) {
-            query = {
-                $or: [
-                    {
-                        "student.studentId": {
-                            $regex: searchQuery,
-                            $options: "i",
-                        },
-                    },
-                    { name: { $regex: searchQuery, $options: "i" } },
-                ],
-            };
-        }
+        // Build the filter object based on the provided search query
+        const filter = {
+            $or: [
+                { name: { $regex: new RegExp(search, "i") } },
+                { email: { $regex: new RegExp(search, "i") } },
+                { walletAddress: { $regex: new RegExp(search, "i") } },
+            ],
+            isAdmin: false, // Exclude users where isAdmin is true
+        };
 
-        const users = await User.find(query).populate("student");
+        const users = await User.find(filter)
+            .populate({
+                path: "student",
+                populate: { path: "enrolledProgram" },
+            })
+            .exec();
 
-        if (!users || users.length === 0) {
-            return res
-                .status(404)
-                .json({ message: "No matching users found." });
-        }
-
-        res.status(200).json(users);
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ message: err.message });
+        res.json(users);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 });
 
@@ -263,7 +305,10 @@ app.use("/subjects", subjectRoutes);
 app.use("/certificates", certificateRoutes);
 
 mongoose
-    .connect("mongodb://localhost:27017/Certify")
+    .connect("mongodb://localhost:27017/Certify", {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+    })
     .then((res) => {
         console.log("Connected to  certify database");
         app.listen(3001, () => {

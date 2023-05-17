@@ -15,9 +15,36 @@ export const fetchStudentData = async (data, query, signal) => {
     }
 };
 
+export const fetchStudentSearchData = async (data, query, signal) => {
+    console.log("query", query);
+    try {
+        return await publicRequest(
+            `usersearch${query && query}`,
+            "GET",
+            data,
+            signal
+        );
+    } catch (err) {
+        throw err;
+    }
+};
+
 export const addStudentData = async (data, query, signal) => {
     try {
         return await publicRequest(`users`, "POST", data, signal);
+    } catch (err) {
+        throw err;
+    }
+};
+
+export const updateExistingUser = async (data, query, signal) => {
+    try {
+        return await publicRequest(
+            `users${query && query}`,
+            "PUT",
+            data,
+            signal
+        );
     } catch (err) {
         throw err;
     }
@@ -32,6 +59,19 @@ export const changePassword = async (data, query, signal) => {
                 currentPassword: data.currentPassword,
                 newPassword: data.newPassword,
             },
+            signal
+        );
+    } catch (err) {
+        throw err;
+    }
+};
+
+export const searchStudents = async (data, query, signal) => {
+    try {
+        return await publicRequest(
+            `usersearch${query && query}`,
+            "GET",
+            data,
             signal
         );
     } catch (err) {
