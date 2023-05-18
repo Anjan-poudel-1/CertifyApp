@@ -23,7 +23,10 @@ router.post("/", async (req, res) => {
 // Get all programs
 router.get("/", async (req, res) => {
     try {
-        const programs = await Program.find({}).populate("years.subjects");
+        const programs = await Program.find({}).populate({
+            path: "years.subjects",
+            model: "Subject",
+        });
         res.status(200).json(programs);
     } catch (err) {
         res.status(500).json({ message: err.message });

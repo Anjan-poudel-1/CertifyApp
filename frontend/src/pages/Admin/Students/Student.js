@@ -5,7 +5,7 @@ import {
     actions,
     initialState,
 } from "../../../contexts/EthContext/state";
-
+import Accordion from "react-bootstrap/Accordion";
 import { useNavigate, useParams } from "react-router";
 import FloatingLabel from "react-bootstrap/FloatingLabel";
 import Form from "react-bootstrap/Form";
@@ -18,13 +18,55 @@ import {
 import { checkPasswordFormError } from "../../../helpers/errors";
 import isEmpty from "../../../helpers/isEmpty";
 import { useEth } from "../../../contexts/EthContext";
+import { fetchProgramsData } from "../../../apis/Private/programs";
+import {
+    fetchStudentResult,
+    updateStudentResult,
+} from "../../../apis/Private/results";
+import { createStudentResult } from "../../../apis/Private/results";
 
 function Student() {
     const [loading, setLoading] = useState(false);
     const { state, dispatch } = useEth();
+    const [resultData, setResultData] = useState([]);
+    const [subjects, setSubjects] = useState({});
+    const [programDetail, setProgramDetail] = useState({});
     const [academicUpdate, setAcademicUpdate] = useState(false);
     const [personalInfoUpdate, setPersonalInfoUpdate] = useState(false);
     const userId = useParams();
+
+    const [userData, setUserData] = useState({
+        name: "",
+        email: "",
+        walletAddress: "",
+        studentId: "",
+        id: "",
+    });
+
+    const [initialUserData, setInitialUserData] = useState({});
+    const [initialAcademic, setInitialAcademic] = useState({});
+
+    const [errors, setErrors] = useState({
+        name: "",
+        email: "",
+        walletAddress: "",
+        enrolledYear: "",
+        isGraduated: "",
+    });
+
+    const [yearToUpdate, setYearToUpdate] = useState({
+        0: false,
+        1: false,
+        2: false,
+        3: false,
+    });
+
+    const [academicData, setAcademicData] = useState({
+        name: "",
+        enrolledYear: "",
+        programLength: "",
+        isGraduated: "",
+    });
 
     const submitAcademicForm = async () => {
         setLoading(true);
@@ -117,38 +159,13 @@ function Student() {
         return () => controller.signal();
     };
 
-    const [userData, setUserData] = useState({
-        name: "",
-        email: "",
-        walletAddress: "",
-        studentId: "",
-        id: "",
-    });
-
-    const [initialUserData, setInitialUserData] = useState({});
-    const [initialAcademic, setInitialAcademic] = useState({});
-
-    const [errors, setErrors] = useState({
-        name: "",
-        email: "",
-        walletAddress: "",
-        enrolledYear: "",
-        isGraduated: "",
-    });
-
-    const [academicData, setAcademicData] = useState({
-        name: "",
-        enrolledYear: "",
-        programLength: "",
-        isGraduated: "",
-    });
     const getUserDetails = async () => {
         setLoading(true);
 
         const controller = new AbortController();
         let filterQuery = `/${userId.id}`;
         await fetchStudentData(null, filterQuery, controller.signal)
-            .then((res) => {
+            .then(async (res) => {
                 if (res.response.ok) {
                     setUserData({
                         name: res.json.name,
@@ -156,6 +173,7 @@ function Student() {
                         walletAddress: res.json.walletAddress,
                         studentId: res.json.student.studentId,
                         id: res.json._id,
+                        studentOriginalId: res.json.student._id,
                     });
 
                     setInitialUserData({
@@ -178,7 +196,30 @@ function Student() {
                         enrolledYear: res.json.student.enrolledYear,
                         programLength: 4,
                         isGraduated: res.json.student.isGraduated,
+                        programId: res.json.student.enrolledProgram._id,
                     });
+
+                    let programId = res.json.student.enrolledProgram._id;
+                    let _tempSubjects = {};
+                    await fetchProgramsData(null, `/${programId}`).then(
+                        (resp) => {
+                            if (resp.response.ok) {
+                                setProgramDetail(resp.json);
+
+                                let _tempData = { ...resp.json };
+
+                                _tempData.years.map((yearDetail) => {
+                                    yearDetail.subjects.map((sub) => {
+                                        _tempSubjects = {
+                                            ..._tempSubjects,
+                                            [sub._id]: 0,
+                                        };
+                                    });
+                                });
+                            }
+                        }
+                    );
+                    getResultsDetails(res.json.student._id, _tempSubjects);
                 } else {
                     toast.error("Unable to fetch student Data");
                 }
@@ -190,9 +231,120 @@ function Student() {
 
         return () => controller.abort();
     };
+
+    const getResultsDetails = async (id, _tempSubjects) => {
+        const controller = new AbortController();
+        await fetchStudentResult({ id: id }, "", controller.signal)
+            .then((res) => {
+                if (res.response.ok) {
+                    setResultData(res.json);
+                    let _tempData = {};
+                    if (res.json.data && !isEmpty(res.json.data)) {
+                        res.json.data.subjects.map((resultData) => {
+                            _tempData = {
+                                ..._tempData,
+                                [resultData._id]: resultData.marks,
+                            };
+                        });
+                    }
+
+                    setSubjects({ ..._tempSubjects, ..._tempData });
+                }
+            })
+            .catch((err) => {});
+
+        return () => controller.abort();
+    };
+
+    const toUpdateYear = (year) => {
+        setYearToUpdate({
+            ...yearToUpdate,
+            [year]: !yearToUpdate[year],
+        });
+    };
     useEffect(() => {
         getUserDetails();
     }, []);
+
+    const getMarks = (subjectId) => {
+        return subjects[subjectId];
+    };
+
+    const getFormattedSubjectData = () => {
+        // {
+        //     "subjects": [
+        //         {
+        //             "subject": "645e41afa7c432deab65fdce",
+        //             "marks": 85
+        //         },
+        //         {
+        //             "subject": "645e4772a5b49092128400b5",
+        //             "marks": 90
+        //         }
+        //     ]
+        // }
+        // we need in this format
+    };
+
+    const resultSubmitted = async (year) => {
+        console.log("Year is ", year);
+        console.log(programDetail);
+        let yearSeparatedProgram = [...programDetail.years];
+        yearSeparatedProgram = yearSeparatedProgram[year].subjects;
+
+        let yearSeperatedMarks = {};
+
+        yearSeparatedProgram.map((sep, index) => {
+            yearSeperatedMarks[sep._id] = subjects[sep._id];
+        });
+        console.log("Year separated marks", yearSeperatedMarks);
+        console.log("Percentage", calculatePercentage(yearSeperatedMarks));
+
+        console.log(subjects);
+        console.log("Previous results", resultData.data);
+
+        const controller = new AbortController();
+
+        let _toSendSubjects = getFormattedSubjectData();
+        if (isEmpty(resultData.data)) {
+            // We have a post request....
+            await createStudentResult(
+                { id: userData.studentOriginalId, ..._toSendSubjects },
+                "",
+                controller.signal
+            )
+                .then((res) => {
+                    if (res.response.ok) {
+                        getUserDetails();
+                        toast.success("Result Updated");
+                        setYearToUpdate({
+                            0: false,
+                            1: false,
+                            2: false,
+                            3: false,
+                        });
+                    }
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+        } else {
+            // We have put request to the id...
+            // await updateStudentResult({
+            //     studentId: userData.studentOriginalId,
+            // });
+        }
+        return () => controller.abort();
+    };
+
+    const calculatePercentage = (marks) => {
+        let totalPercent = 0;
+        Object.keys(marks).map((sub) => {
+            totalPercent = totalPercent + parseInt(marks[sub]);
+        });
+
+        return totalPercent / Object.keys(marks).length;
+    };
     return (
         <div className="page container">
             <div className="page-header">Student</div>
@@ -502,8 +654,181 @@ function Student() {
                             style={{ padding: "30px" }}
                             className="input-card"
                         >
-                            <h5> Academic Result </h5>
-                            <Row></Row>
+                            <h5>
+                                {" "}
+                                Academic Result{" "}
+                                {programDetail &&
+                                    programDetail.name &&
+                                    `(${programDetail.name})`}{" "}
+                            </h5>
+                            <Row>
+                                <div>
+                                    {programDetail &&
+                                        programDetail.years &&
+                                        programDetail.years.map(
+                                            (programData, index) => {
+                                                return (
+                                                    <Accordion
+                                                        style={{
+                                                            margin: "1rem 0",
+                                                        }}
+                                                    >
+                                                        <Accordion.Item eventKey="0">
+                                                            <Accordion.Header>
+                                                                Year #
+                                                                {index + 1}
+                                                            </Accordion.Header>
+                                                            <Accordion.Body>
+                                                                <div
+                                                                    style={{
+                                                                        textAlign:
+                                                                            "end",
+                                                                    }}
+                                                                >
+                                                                    {!yearToUpdate[
+                                                                        index
+                                                                    ] && (
+                                                                        <button
+                                                                            className="btn btn-primary btn-sm"
+                                                                            onClick={() =>
+                                                                                toUpdateYear(
+                                                                                    index
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            Update
+                                                                        </button>
+                                                                    )}
+                                                                </div>
+
+                                                                <div>
+                                                                    {programData.subjects.map(
+                                                                        (
+                                                                            indisub,
+                                                                            _index
+                                                                        ) => {
+                                                                            return (
+                                                                                <div
+                                                                                    style={{
+                                                                                        display:
+                                                                                            "flex",
+                                                                                        alignItems:
+                                                                                            "center",
+                                                                                        gap: "1.5rem",
+                                                                                        margin: "0.5rem 0",
+                                                                                    }}
+                                                                                >
+                                                                                    <div
+                                                                                        style={{
+                                                                                            minWidth:
+                                                                                                "150px",
+                                                                                            fontWeight:
+                                                                                                "600",
+                                                                                        }}
+                                                                                    >
+                                                                                        {
+                                                                                            indisub.name
+                                                                                        }{" "}
+                                                                                        :
+                                                                                    </div>
+                                                                                    {yearToUpdate[
+                                                                                        index
+                                                                                    ] ? (
+                                                                                        <input
+                                                                                            type="number"
+                                                                                            max={
+                                                                                                100
+                                                                                            }
+                                                                                            placeholder="Enter marks"
+                                                                                            value={
+                                                                                                subjects[
+                                                                                                    indisub
+                                                                                                        ._id
+                                                                                                ]
+                                                                                            }
+                                                                                            onChange={(
+                                                                                                e
+                                                                                            ) =>
+                                                                                                setSubjects(
+                                                                                                    {
+                                                                                                        ...subjects,
+                                                                                                        [indisub._id]:
+                                                                                                            e
+                                                                                                                .target
+                                                                                                                .value,
+                                                                                                    }
+                                                                                                )
+                                                                                            }
+                                                                                        />
+                                                                                    ) : (
+                                                                                        <div>
+                                                                                            {getMarks(
+                                                                                                indisub._id
+                                                                                            )}
+                                                                                        </div>
+                                                                                    )}
+                                                                                </div>
+                                                                            );
+                                                                        }
+                                                                    )}
+                                                                    {yearToUpdate[
+                                                                        index
+                                                                    ] && (
+                                                                        <div className="bottom-card">
+                                                                            <div
+                                                                                className="bottom-card"
+                                                                                style={{
+                                                                                    marginTop:
+                                                                                        "2rem",
+                                                                                }}
+                                                                            >
+                                                                                <button
+                                                                                    className={`btn btn-secondary`}
+                                                                                    type="submit"
+                                                                                    disabled={
+                                                                                        loading
+                                                                                    }
+                                                                                    onClick={() => {
+                                                                                        setYearToUpdate(
+                                                                                            {
+                                                                                                ...yearToUpdate,
+                                                                                                [index]:
+                                                                                                    !yearToUpdate[
+                                                                                                        index
+                                                                                                    ],
+                                                                                            }
+                                                                                        );
+                                                                                    }}
+                                                                                >
+                                                                                    Cancel
+                                                                                </button>
+
+                                                                                <button
+                                                                                    className={`btn btn-primary`}
+                                                                                    type="submit"
+                                                                                    disabled={
+                                                                                        loading
+                                                                                    }
+                                                                                    onClick={() =>
+                                                                                        resultSubmitted(
+                                                                                            index
+                                                                                        )
+                                                                                    }
+                                                                                >
+                                                                                    Submit
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </Accordion.Body>
+                                                        </Accordion.Item>
+                                                    </Accordion>
+                                                );
+                                            }
+                                        )}
+                                </div>
+                            </Row>
                         </Card.Body>
                     </Card>
                 </Col>

@@ -301,7 +301,7 @@ app.get("/students/:studentId/results", async (req, res) => {
 
         res.status(200).json({
             message: "Results fetched successfully",
-            data: student.results,
+            data: student.results[0] || [],
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
