@@ -39,8 +39,8 @@ export const updateStudentResult = async (data, query, signal) => {
 
     try {
         return await publicRequest(
-            `/students/${studentId}/results/${resultId}`,
-            "POST",
+            `students/${studentId}/results/${resultId}`,
+            "PUT",
             data,
             signal
         );

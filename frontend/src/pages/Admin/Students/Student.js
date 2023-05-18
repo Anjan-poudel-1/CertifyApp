@@ -243,10 +243,16 @@ function Student() {
                         res.json.data.subjects.map((resultData) => {
                             _tempData = {
                                 ..._tempData,
-                                [resultData._id]: resultData.marks,
+                                [resultData.subject]: resultData.marks,
                             };
                         });
                     }
+
+                    console.log("Here ,,,,,,", _tempData);
+                    console.log("Here ,,,,,,", {
+                        ..._tempSubjects,
+                        ..._tempData,
+                    });
 
                     setSubjects({ ..._tempSubjects, ..._tempData });
                 }
@@ -271,19 +277,19 @@ function Student() {
     };
 
     const getFormattedSubjectData = () => {
-        // {
-        //     "subjects": [
-        //         {
-        //             "subject": "645e41afa7c432deab65fdce",
-        //             "marks": 85
-        //         },
-        //         {
-        //             "subject": "645e4772a5b49092128400b5",
-        //             "marks": 90
-        //         }
-        //     ]
-        // }
-        // we need in this format
+        let _tempSubjects = { ...subjects };
+        let toReturn = [];
+        _tempSubjects &&
+            Object.keys(_tempSubjects).map((_key, index) => {
+                let _obj = {
+                    subject: _key,
+                    marks: _tempSubjects[_key],
+                };
+
+                toReturn.push(_obj);
+            });
+
+        return { subjects: toReturn };
     };
 
     const resultSubmitted = async (year) => {
@@ -306,6 +312,8 @@ function Student() {
         const controller = new AbortController();
 
         let _toSendSubjects = getFormattedSubjectData();
+
+        console.log("To send subjects", _toSendSubjects);
         if (isEmpty(resultData.data)) {
             // We have a post request....
             await createStudentResult(
@@ -329,6 +337,28 @@ function Student() {
                     console.log(err);
                 });
         } else {
+            let resultId = resultData.data._id;
+            await updateStudentResult({
+                resultId,
+                studentId: userData.studentOriginalId,
+                ..._toSendSubjects,
+            })
+                .then((res) => {
+                    if (res.response.ok) {
+                        getUserDetails();
+                        toast.success("Result Updated");
+                        setYearToUpdate({
+                            0: false,
+                            1: false,
+                            2: false,
+                            3: false,
+                        });
+                    } else {
+                        toast.error("Couldnot update Student Result");
+                    }
+                })
+                .catch((err) => {});
+
             // We have put request to the id...
             // await updateStudentResult({
             //     studentId: userData.studentOriginalId,
