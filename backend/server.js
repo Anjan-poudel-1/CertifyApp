@@ -17,6 +17,7 @@ const certificateRoutes = require("./routes/certificateRoutes");
 const programRoutes = require("./routes/programRoutes");
 const studentRoutes = require("./routes/studentRoutes");
 const subjectRoutes = require("./routes/subjectRoutes");
+const Certificate = require("./models/CertificateModel");
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -54,10 +55,14 @@ app.post("/users", async (req, res) => {
     try {
         let savedStudent = {};
         if (!req.body.isAdmin) {
+            const newCertificate = new Certificate({});
+            let savedCertificate = await newCertificate.save();
+            console.log("savedCertificate", savedCertificate);
             const newStudent = new Student({
                 enrolledYear: req.body.enrolledYear,
                 isGraduated: req.body.isGraduated,
                 enrolledProgram: req.body.enrolledProgram,
+                certificate: savedCertificate._id,
             });
             savedStudent = await newStudent.save();
         }
@@ -94,7 +99,10 @@ app.post("/users", async (req, res) => {
         } else {
             populatedUser = await savedUser.populate({
                 path: "student",
-                populate: { path: "enrolledProgram", model: "Program" },
+                populate: [
+                    { path: "enrolledProgram", model: "Program" },
+                    { path: "certificate", model: "Certificate" },
+                ],
             });
         }
 
