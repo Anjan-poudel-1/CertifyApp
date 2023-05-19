@@ -1,0 +1,168 @@
+import React, { useState, useRef, useEffect } from "react";
+import { Row, Col, Card, Table, Image } from "react-bootstrap";
+
+import Accordion from "react-bootstrap/Accordion";
+import { useNavigate, useParams } from "react-router";
+import Form from "react-bootstrap/Form";
+import { toast } from "react-toastify";
+import {
+    changePassword,
+    fetchStudentData,
+    updateExistingUser,
+} from "../../../apis/Private/students";
+import isEmpty from "../../../helpers/isEmpty";
+import { useEth } from "../../../contexts/EthContext";
+import { fetchProgramsData } from "../../../apis/Private/programs";
+
+import {
+    fetchStudentResult,
+    updateStudentResult,
+} from "../../../apis/Private/results";
+import { createStudentResult } from "../../../apis/Private/results";
+import CertificateComponent from "./CertificateComponent";
+import certificateTemplate from "../../../assets/images/certificate template.png";
+function Student() {
+    const [loading, setLoading] = useState(false);
+    const { state, dispatch } = useEth();
+    const [resultData, setResultData] = useState([]);
+    const [subjects, setSubjects] = useState({});
+    const [programDetail, setProgramDetail] = useState({});
+    const [academicUpdate, setAcademicUpdate] = useState(false);
+    const [personalInfoUpdate, setPersonalInfoUpdate] = useState(false);
+    const userId = useParams();
+    const canvasRef = useRef(null);
+    const [userData, setUserData] = useState({
+        name: "",
+        email: "",
+        walletAddress: "",
+        studentId: "",
+        id: "",
+    });
+
+    const [initialUserData, setInitialUserData] = useState({});
+    const [initialAcademic, setInitialAcademic] = useState({});
+
+    const [errors, setErrors] = useState({
+        name: "",
+        email: "",
+        walletAddress: "",
+        enrolledYear: "",
+        isGraduated: "",
+    });
+
+    const [hasCompletedAll, setHasCompletedAll] = useState(false);
+
+    const [yearToUpdate, setYearToUpdate] = useState({
+        0: false,
+        1: false,
+        2: false,
+        3: false,
+    });
+
+    const [academicData, setAcademicData] = useState({
+        name: "",
+        enrolledYear: "",
+        programLength: "",
+        isGraduated: "",
+    });
+
+ 
+
+    const downloadCertificate = () => {
+        // Load the certificate template
+
+        let studentName = userData.name;
+        let studentProgram = academicData.name;
+        let enrolledYear = academicData.enrolledYear;
+
+        const certificate = new Image();
+        certificate.src = certificateTemplate;
+
+        // Create a canvas element
+        const canvas = document.createElement("canvas");
+        canvas.width = certificate.width;
+        canvas.height = certificate.height;
+        const ctx = canvas.getContext("2d");
+
+        // Draw the template onto the canvas
+        ctx.drawImage(certificate, 0, 0);
+
+        // Add the text
+        ctx.font = "36px serif";
+        ctx.fillText(studentName, 160, 222);
+        ctx.fillText(studentProgram, 350, 285);
+        ctx.fillText(enrolledYear, 160, 340);
+
+        // Download the certificate
+        const link = document.createElement("a");
+        link.download = "certificate.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+    };
+
+    return (
+        <div className="page container">
+            <div className="page-header">Student</div>
+
+            
+
+            {userData && !isEmpty(userData) && (
+                <Row style={{ margin: "2rem 0" }}>
+                    <Col>
+                        <Card>
+                            <Card.Body
+                                style={{ padding: "30px" }}
+                                className="input-card"
+                            >
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "space-between",
+                                        marginBottom: "1rem",
+                                    }}
+                                >
+                                    <h5> Academic Certificate </h5>
+                                </div>
+                                <div
+                                    style={{
+                                        minHeight: "100px",
+                                        paddingBottom: "30px",
+                                    }}
+                                >
+                                    {userData.isGraduated ? (
+                                        <CertificateComponent />
+                                    ) : checkIfHasCompleted() ? (
+                                        <>
+                                            Student has completed all the course
+                                            work. He/she may get the
+                                            certificate.
+                                            <br />
+                                            <br />
+                                            <button
+                                                onClick={downloadCertificate}
+                                            >
+                                                Download Certificate
+                                            </button>
+                                            <div id="preview"></div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            Student has not completed all the
+                                            modules. He/She is not eligible to
+                                            get certificate
+                                        </>
+                                    )}
+                                </div>
+
+                                <div id="preview"> </div>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                </Row>
+            )}
+        </div>
+    );
+}
+
+export default Student;
