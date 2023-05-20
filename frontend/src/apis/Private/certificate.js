@@ -25,3 +25,16 @@ export const createCertificateData = async (data, query, signal) => {
         throw err;
     }
 };
+
+export const updateCertificateData = async (data, query, signal) => {
+    try {
+        return await publicRequest(
+            `certificates${query && query}`,
+            "PUT",
+            data,
+            signal
+        );
+    } catch (err) {
+        throw err;
+    }
+};

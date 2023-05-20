@@ -21,10 +21,12 @@ import {
 import { createStudentResult } from "../../../apis/Private/results";
 import CertificateComponent from "./CertificateComponent";
 import certificateTemplate from "../../../assets/images/certificate template.png";
+import { updateCertificateData } from "../../../apis/Private/certificate";
 function Student() {
     const [loading, setLoading] = useState(false);
     const { state, dispatch } = useEth();
     const [resultData, setResultData] = useState([]);
+    const [certificateDetails, setCertificateDetails] = useState({});
     const [subjects, setSubjects] = useState({});
     const [programDetail, setProgramDetail] = useState({});
     const [academicUpdate, setAcademicUpdate] = useState(false);
@@ -66,6 +68,7 @@ function Student() {
         enrolledYear: "",
         programLength: "",
         isGraduated: "",
+        certificateId: "",
     });
 
     const submitAcademicForm = async () => {
@@ -183,7 +186,7 @@ function Student() {
                         studentId: res.json.student.studentId,
                         id: res.json._id,
                     });
-
+                    setCertificateDetails({ ...res.json.student.certificate });
                     setAcademicData({
                         name: res.json.student.enrolledProgram.name,
                         enrolledYear: res.json.student.enrolledYear,
@@ -391,9 +394,42 @@ function Student() {
         return parseInt(totalPercent / Object.keys(marks).length).toFixed(2);
     };
 
-    const saveCertificate = () => {};
+    const saveCertificate = async () => {
+        console.log("ipfsURL", ipfsurl);
+
+        const controller = new AbortController();
+
+        let _certificateId = certificateDetails._id;
+        let _toUpdateCertificate = {
+            dateGenerated: new Date(),
+            finalPercentage: calculatePercentage(subjects),
+            image: ipfsurl,
+            // student: userData.studentId,
+            student: userData.studentOriginalId,
+        };
+
+        console.log("_certificateId", _certificateId);
+        console.log("To update certificate", _toUpdateCertificate);
+
+        await updateCertificateData(
+            _toUpdateCertificate,
+            `/${_certificateId}`,
+            controller.signal
+        )
+            .then((res) => {
+                if (res.response.ok) {
+                    toast.success("Certificate Uploaded Successfully");
+                } else {
+                    toast.success("Couldnot upload the certificate");
+                }
+            })
+            .catch((err) => {});
+
+        return () => controller.abort();
+    };
 
     const downloadCertificate = () => {
+        console.log(certificateDetails);
         // Load the certificate template
         const certificate = new Image();
         certificate.onload = () => {
@@ -405,6 +441,9 @@ function Student() {
 
             // Draw the template onto the canvas
             ctx.drawImage(certificate, 0, 0);
+
+            ctx.font = "30px serif";
+            ctx.fillText(`ID: ${certificateDetails._id}`, 80, 80);
 
             ctx.font = "bold 34px serif";
             ctx.fillText(academicData.enrolledYear, 1035, 1065);

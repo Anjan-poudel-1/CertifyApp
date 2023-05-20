@@ -11,7 +11,6 @@ const certificateSchema = mongoose.Schema(
         },
         dateGenerated: {
             type: Date,
-            default: Date.now,
         },
         finalPercentage: {
             type: Number,

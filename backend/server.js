@@ -18,6 +18,7 @@ const programRoutes = require("./routes/programRoutes");
 const studentRoutes = require("./routes/studentRoutes");
 const subjectRoutes = require("./routes/subjectRoutes");
 const Certificate = require("./models/CertificateModel");
+const Program = require("./models/ProgramModel");
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -43,6 +44,25 @@ let transporter = nodemailer.createTransport({
         user: "certifyapp092@gmail.com", // replace with your SMTP server username
         pass: `${process.env.EMAIL_PASSWORD}`, // replace with your SMTP server password
     },
+});
+
+app.get("/stats", async (req, res) => {
+    try {
+        const totalStudents = await Student.countDocuments();
+        const totalPrograms = await Program.countDocuments();
+        const totalCertificates = await Certificate.countDocuments({
+            dateGenerated: { $ne: null },
+        });
+
+        res.json({
+            totalStudents,
+            totalPrograms,
+            totalCertificates,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error fetching data" });
+    }
 });
 
 // Routes
@@ -189,7 +209,10 @@ app.get("/users/:userId", async (req, res) => {
         })
             .populate({
                 path: "student",
-                populate: { path: "enrolledProgram" },
+                populate: [
+                    { path: "enrolledProgram" },
+                    { path: "certificate", model: "Certificate" },
+                ],
             })
             .exec();
         res.status(200).json(populatedData);
@@ -341,6 +364,77 @@ app.put("/students/:studentId/results/:resultId", async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
+});
+
+app.get("/graph-data", async (req, res) => {
+    const data = [];
+
+    // Students enrolled per year
+    const enrolledData = {
+        name: "Students Enrolled per Year",
+        description: "Number of students enrolled in each year",
+        labels: [],
+        datasets: [],
+    };
+
+    const enrolledResults = await Student.aggregate([
+        { $group: { _id: "$enrolledYear", count: { $sum: 1 } } },
+    ]);
+    enrolledResults.forEach((result) => {
+        enrolledData.labels.push(result._id);
+        enrolledData.datasets[0].data.push(result.count);
+    });
+    data.push(enrolledData);
+
+    // Certificates generated per year
+    const certificateData = {
+        name: "Certificates Generated per Year",
+        description: "Number of certificates generated each year",
+        labels: [],
+        datasets: [],
+    };
+
+    const certificateResults = await Certificate.aggregate([
+        { $group: { _id: { $year: "$dateGenerated" }, count: { $sum: 1 } } },
+    ]);
+    certificateResults.forEach((result) => {
+        certificateData.labels.push(result._id);
+        certificateData.datasets[0].data.push(result.count);
+    });
+    data.push(certificateData);
+
+    // Get number of students in each program
+    const programData = {
+        name: "Number of Students per Program",
+        description: "Number of students enrolled in each program",
+        labels: [],
+        datasets: [],
+    };
+
+    const programResults = await Program.aggregate([
+        {
+            $lookup: {
+                from: "students",
+                localField: "_id",
+                foreignField: "enrolledProgram",
+                as: "enrolledStudents",
+            },
+        },
+        { $unwind: "$enrolledStudents" },
+        {
+            $group: {
+                _id: "$name",
+                count: { $sum: 1 },
+            },
+        },
+    ]);
+    programResults.forEach((result) => {
+        programData.labels.push(result._id);
+        programData.datasets[0].data.push(result.count);
+    });
+    data.push(programData);
+
+    res.json(data);
 });
 
 app.post("/login", async (req, res) => {

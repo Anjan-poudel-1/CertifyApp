@@ -33,7 +33,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // UPDATE
-router.patch("/:id", async (req, res) => {
+router.put("/:id", async (req, res) => {
     try {
         const updatedCertificate = await Certificate.findByIdAndUpdate(
             req.params.id,
