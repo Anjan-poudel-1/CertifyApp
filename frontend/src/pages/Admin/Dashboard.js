@@ -32,7 +32,25 @@ ChartJS.register(
     RadialLinearScale,
     ArcElement
 );
-
+const randomColors = [
+    "rgba(255, 99, 132, 0.5)",
+    "rgba(54, 162, 235, 0.5)",
+    "rgba(255, 206, 86, 0.5)",
+    "rgba(75, 192, 192, 0.5)",
+    "rgba(153, 102, 255, 0.5)",
+    "rgba(255, 159, 64, 0.5)",
+    "rgba(143, 188, 143, 0.5)",
+    "rgba(240, 248, 255, 0.5)",
+    "rgba(139, 0, 0, 0.5)",
+    "rgba(0, 206, 209, 0.5)",
+    "rgba(220, 20, 60, 0.5)",
+    "rgba(0, 191, 255, 0.5)",
+    "rgba(218, 165, 32, 0.5)",
+    "rgba(148, 0, 211, 0.5)",
+    "rgba(245, 222, 179, 0.5)",
+    "rgba(255, 240, 245, 0.5)",
+    "rgba(211, 211, 211, 0.5)",
+];
 export const data = {
     labels: ["Red", "Blue", "Yellow", "Green", "Purple", "Orange"],
     datasets: [
