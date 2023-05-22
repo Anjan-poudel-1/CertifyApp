@@ -99,54 +99,7 @@ function AccountSettings() {
     return (
         <div className="page container">
             <div className="page-header">Account Settings</div>
-            <Row style={{ margin: "2rem 0" }}>
-                <Col>
-                    <Card>
-                        <Card.Body
-                            style={{ padding: "30px" }}
-                            className="input-card"
-                        >
-                            <h5> Personal Information </h5>
-                            <Row>
-                                <Col md={6}>
-                                    <div className="display-label">Name</div>
-                                    <div className="display-data">
-                                        {userData.name}
-                                    </div>
-                                </Col>
-
-                                <Col md={6}>
-                                    <div className="display-label">Email</div>
-                                    <div className="display-data">
-                                        {userData.email}
-                                    </div>
-                                </Col>
-                            </Row>
-
-                            <br />
-                            <Row>
-                                <Col md={6}>
-                                    <div className="display-label">User Id</div>
-                                    <div className="display-data">
-                                        {userData.userId}
-                                    </div>
-                                </Col>
-
-                                <Col md={6}>
-                                    <div className="display-label">
-                                        Wallet Address
-                                    </div>
-                                    <div className="display-data">
-                                        {userData.walletAddress}
-                                    </div>
-                                </Col>
-                            </Row>
-                        </Card.Body>
-                    </Card>
-                </Col>
-            </Row>
-
-            {userData && !userData.isAdmin && (
+            {userData && userData.isAdmin && (
                 <Row style={{ margin: "2rem 0" }}>
                     <Col>
                         <Card>
@@ -154,23 +107,23 @@ function AccountSettings() {
                                 style={{ padding: "30px" }}
                                 className="input-card"
                             >
-                                <h5> Academics </h5>
+                                <h5> Personal Information </h5>
                                 <Row>
                                     <Col md={6}>
                                         <div className="display-label">
-                                            Program Name
+                                            Name
                                         </div>
                                         <div className="display-data">
-                                            Anjan Poudel
+                                            {userData.name}
                                         </div>
                                     </Col>
 
                                     <Col md={6}>
                                         <div className="display-label">
-                                            Enrolled Year
+                                            Email
                                         </div>
                                         <div className="display-data">
-                                            poudelanjan8@gmail.com
+                                            {userData.email}
                                         </div>
                                     </Col>
                                 </Row>
@@ -179,17 +132,19 @@ function AccountSettings() {
                                 <Row>
                                     <Col md={6}>
                                         <div className="display-label">
-                                            Program Length
+                                            User Id
                                         </div>
-                                        <div className="display-data">4</div>
+                                        <div className="display-data">
+                                            {userData.userId}
+                                        </div>
                                     </Col>
 
                                     <Col md={6}>
                                         <div className="display-label">
-                                            Is Graduated
+                                            Wallet Address
                                         </div>
                                         <div className="display-data">
-                                            False
+                                            {userData.walletAddress}
                                         </div>
                                     </Col>
                                 </Row>

@@ -1,5 +1,5 @@
 import React, { useReducer, useCallback, useEffect } from "react";
-import { ethers } from "ethers";
+import { Signer, ethers } from "ethers";
 import EthContext from "./EthContext";
 import { reducer, actions, initialState } from "./state";
 
@@ -24,9 +24,9 @@ function EthProvider({ children }) {
             const { abi } = artifact;
             let address, contract;
             try {
-                address = process.env.REACT_APP_CONTRACT_ADDRESS;
+                address = "0x4E9213D60B3595dfCEa478d4d281029487ef5A75";
                 console.log(address, abi, provider);
-                contract = new ethers.Contract(address, abi, provider);
+                contract = new ethers.Contract(address, abi, accountsSigner);
             } catch (err) {
                 console.error(err);
             }

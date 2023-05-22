@@ -11,7 +11,11 @@ import { fetchProgramsData } from "../../../apis/Private/programs";
 import { toast } from "react-toastify";
 import { checkStudentFormError } from "../../../helpers/errors";
 import isEmpty from "../../../helpers/isEmpty";
+import { useEth } from "../../../contexts/EthContext";
+
 function Create() {
+    const { state, dispatch } = useEth();
+
     const [loading, setLoading] = useState(false);
     const [studentData, setStudentData] = useState({
         name: "",
@@ -32,7 +36,7 @@ function Create() {
 
     const navigate = useNavigate();
 
-    const submitStudentForm = () => {
+    const submitStudentForm = async () => {
         // setLoading(true);
         const controller = new AbortController();
 
@@ -45,10 +49,28 @@ function Create() {
         console.log("studentData", studentData);
 
         if (isEmpty(_errors)) {
-            addStudentData(studentData).then((res) => {
+            console.log(state.contract);
+            console.log(state.contract.changeAdmin);
+
+            addStudentData(studentData).then(async (res) => {
                 if (res.response.ok) {
-                    toast.success("Student Added Successfully");
-                    navigate("/students");
+                    let studentId = res.json.student.studentId;
+
+                    await state.contract
+                        .enrollStudent(
+                            studentId,
+                            studentData.name,
+                            studentData.walletAddress,
+                            parseInt(studentData.enrolledYear),
+                            studentData.enrolledProgram
+                        )
+                        .then((res) => {
+                            toast.success("Student Added Successfully");
+                            navigate("/students");
+                        })
+                        .catch((err) => {
+                            toast.error(err.reason || err.message);
+                        });
                 } else {
                     toast.error("Could not add the student");
                 }

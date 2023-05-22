@@ -165,9 +165,11 @@ app.get("/users", async (req, res) => {
     try {
         const usersData = await User.find({}).populate({
             path: "student",
-            populate: {
-                path: "enrolledProgram",
-            },
+            populate: [
+                {
+                    path: "enrolledProgram",
+                },
+            ],
         });
         res.status(200).json(usersData);
     } catch (err) {
@@ -189,6 +191,22 @@ app.put("/users/:id", async (req, res) => {
             })
             .exec();
         res.status(200).json(updatedSubject);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+app.put("/students/:id", async (req, res) => {
+    try {
+        const updatedStudent = await Student.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true }
+        )
+            .populate("certificate")
+            .populate("results.subject");
+
+        res.status(200).json(updatedStudent);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
@@ -304,7 +322,7 @@ app.put("/users/:id/change-password", async (req, res) => {
     }
 });
 
-app.post("/students/:studentId/results", async (req, res) => {
+app.post("/studentres/:studentId/results", async (req, res) => {
     try {
         const student = await Student.findById(req.params.studentId);
         if (!student) {
@@ -323,7 +341,7 @@ app.post("/students/:studentId/results", async (req, res) => {
     }
 });
 
-app.get("/students/:studentId/results", async (req, res) => {
+app.get("/studentres/:studentId/results", async (req, res) => {
     try {
         const student = await Student.findById(req.params.studentId);
         if (!student) {
@@ -339,7 +357,7 @@ app.get("/students/:studentId/results", async (req, res) => {
     }
 });
 
-app.put("/students/:studentId/results/:resultId", async (req, res) => {
+app.put("/studentres/:studentId/results/:resultId", async (req, res) => {
     try {
         const student = await Student.findById(req.params.studentId);
         if (!student) {

@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 import {
     changePassword,
     fetchStudentData,
+    updateExistingStudent,
     updateExistingUser,
 } from "../../../apis/Private/students";
 import isEmpty from "../../../helpers/isEmpty";
@@ -222,7 +223,13 @@ function Student() {
                             }
                         }
                     );
-                    getResultsDetails(res.json.student._id, _tempSubjects);
+
+                    let currentResult = getCurrentFormattedResult(
+                        res.json.student.results
+                    );
+
+                    setSubjects({ ..._tempSubjects, ...currentResult });
+                    console.log(_tempSubjects);
                 } else {
                     toast.error("Unable to fetch student Data");
                 }
@@ -235,34 +242,17 @@ function Student() {
         return () => controller.abort();
     };
 
-    const getResultsDetails = async (id, _tempSubjects) => {
-        const controller = new AbortController();
-        await fetchStudentResult({ id: id }, "", controller.signal)
-            .then((res) => {
-                if (res.response.ok) {
-                    setResultData(res.json);
-                    let _tempData = {};
-                    if (res.json.data && !isEmpty(res.json.data)) {
-                        res.json.data.subjects.map((resultData) => {
-                            _tempData = {
-                                ..._tempData,
-                                [resultData.subject]: resultData.marks,
-                            };
-                        });
-                    }
+    const getCurrentFormattedResult = (_data) => {
+        let toReturn = {};
+        let _tempData = [..._data];
 
-                    console.log("Here ,,,,,,", _tempData);
-                    console.log("Here ,,,,,,", {
-                        ..._tempSubjects,
-                        ..._tempData,
-                    });
+        console.log("_data", _data);
 
-                    setSubjects({ ..._tempSubjects, ..._tempData });
-                }
-            })
-            .catch((err) => {});
+        _tempData.map((res) => {
+            toReturn[res.subject] = parseInt(res.marks);
+        });
 
-        return () => controller.abort();
+        return toReturn;
     };
 
     const checkIfHasCompleted = () => {
@@ -310,10 +300,40 @@ function Student() {
         return { subjects: toReturn };
     };
 
+    const getFinalChainAcademics = (_data) => {
+        let yearData = programDetail.years;
+        let academics = {
+            firstYearPercent: 0,
+            secondYearPercent: 0,
+            thirdYearPercent: 0,
+            finalYearPercent: 0,
+        };
+
+        let newTempData = [];
+        yearData.map((i, index) => {
+            let _marks = 0;
+            i.subjects.map((data) => {
+                _marks += parseInt(subjects[data._id]);
+            });
+
+            newTempData[index] = (_marks / i.subjects.length).toFixed(2) * 100;
+        });
+
+        academics = {
+            firstYearPercent: newTempData[0],
+            secondYearPercent: newTempData[1],
+            thirdYearPercent: newTempData[2],
+            finalYearPercent: newTempData[3],
+        };
+
+        console.log("To send acadedmics", academics);
+
+        return academics;
+    };
+
     const resultSubmitted = async (year) => {
-        console.log("Year is ", year);
-        console.log(programDetail);
         let yearSeparatedProgram = [...programDetail.years];
+
         yearSeparatedProgram = yearSeparatedProgram[year].subjects;
 
         let yearSeperatedMarks = {};
@@ -321,111 +341,111 @@ function Student() {
         yearSeparatedProgram.map((sep, index) => {
             yearSeperatedMarks[sep._id] = subjects[sep._id];
         });
-        console.log("Year separated marks", yearSeperatedMarks);
-        console.log("Percentage", calculatePercentage(yearSeperatedMarks));
-
-        console.log(subjects);
-        console.log("Previous results", resultData.data);
-
-        const controller = new AbortController();
 
         let _toSendSubjects = getFormattedSubjectData();
 
-        console.log("To send subjects", _toSendSubjects);
-        if (isEmpty(resultData.data)) {
-            // We have a post request....
-            await createStudentResult(
-                { id: userData.studentOriginalId, ..._toSendSubjects },
-                "",
-                controller.signal
-            )
-                .then((res) => {
-                    if (res.response.ok) {
-                        getUserDetails();
-                        toast.success("Result Updated");
-                        setYearToUpdate({
-                            0: false,
-                            1: false,
-                            2: false,
-                            3: false,
-                        });
-                    }
-                })
-                .catch((err) => {
-                    console.log(err);
-                });
-        } else {
-            let resultId = resultData.data._id;
-            await updateStudentResult({
-                resultId,
-                studentId: userData.studentOriginalId,
-                ..._toSendSubjects,
-            })
-                .then((res) => {
-                    if (res.response.ok) {
-                        getUserDetails();
-                        toast.success("Result Updated");
-                        setYearToUpdate({
-                            0: false,
-                            1: false,
-                            2: false,
-                            3: false,
-                        });
-                    } else {
-                        toast.error("Couldnot update Student Result");
-                    }
-                })
-                .catch((err) => {});
+        console.log("TosendSubjects", _toSendSubjects);
+        let _finalChainAcademicData = getFinalChainAcademics({
+            ..._toSendSubjects,
+        });
 
-            // We have put request to the id...
-            // await updateStudentResult({
-            //     studentId: userData.studentOriginalId,
-            // });
-        }
-        return () => controller.abort();
+        console.log(
+            "userData.studentOriginalId",
+            userData.studentId,
+            _finalChainAcademicData
+        );
+
+        await state.contract
+            .updateAcademics(userData.studentId, _finalChainAcademicData)
+            .then(async (res) => {
+                console.log("yeta");
+                const controller = new AbortController();
+
+                await updateExistingStudent(
+                    { results: _toSendSubjects.subjects },
+                    `/${userData.studentOriginalId}`,
+                    controller.signal
+                )
+                    .then((res) => {
+                        if (res.response.ok) {
+                            toast.success("Result Updated");
+                            setYearToUpdate({
+                                0: false,
+                                1: false,
+                                2: false,
+                                3: false,
+                            });
+
+                            setSubjects({ ...subjects });
+                        } else {
+                            toast.error("Could not update result");
+                        }
+                    })
+                    .catch((err) => {
+                        toast.error("Couldnot update data");
+                    });
+
+                return () => controller.abort();
+            })
+            .catch((err) => {
+                console.log(err.reason);
+                toast.error(err.reason);
+            });
     };
 
     const calculatePercentage = (marks) => {
         let totalPercent = 0;
+        console.log("Subjeccts", subjects);
+        console.log("marks", marks);
         Object.keys(marks).map((sub) => {
             totalPercent = totalPercent + parseInt(marks[sub]);
         });
-
-        return parseInt(totalPercent / Object.keys(marks).length).toFixed(2);
+        console.log("totalPercent", totalPercent, Object.keys(marks).length);
+        return parseFloat(totalPercent / Object.keys(marks).length).toFixed(2);
     };
 
     const saveCertificate = async () => {
         console.log("ipfsURL", ipfsurl);
-
-        const controller = new AbortController();
 
         let _certificateId = certificateDetails._id;
         let _toUpdateCertificate = {
             dateGenerated: new Date(),
             finalPercentage: calculatePercentage(subjects),
             image: ipfsurl,
-            // student: userData.studentId,
             student: userData.studentOriginalId,
         };
 
+        await state.contract
+            .addStudentCertificate(
+                userData.studentId,
+                _certificateId,
+                ipfsurl,
+                _toUpdateCertificate.dateGenerated.toString()
+            )
+            .then(async (res) => {
+                const controller = new AbortController();
+                await updateCertificateData(
+                    _toUpdateCertificate,
+                    `/${_certificateId}`,
+                    controller.signal
+                )
+                    .then((res) => {
+                        if (res.response.ok) {
+                            toast.success("Certificate Uploaded Successfully");
+                        } else {
+                            toast.success("Couldnot upload the certificate");
+                        }
+                    })
+                    .catch((err) => {});
+
+                return () => controller.abort();
+            })
+            .catch((err) => {
+                toast.error(err.reason);
+            });
+
         console.log("_certificateId", _certificateId);
         console.log("To update certificate", _toUpdateCertificate);
-
-        await updateCertificateData(
-            _toUpdateCertificate,
-            `/${_certificateId}`,
-            controller.signal
-        )
-            .then((res) => {
-                if (res.response.ok) {
-                    toast.success("Certificate Uploaded Successfully");
-                } else {
-                    toast.success("Couldnot upload the certificate");
-                }
-            })
-            .catch((err) => {});
-
-        return () => controller.abort();
     };
 
     const downloadCertificate = () => {

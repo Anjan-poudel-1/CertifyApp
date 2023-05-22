@@ -89,14 +89,15 @@ contract Certify is ERC721 {
     address public admin;
 
     struct Academics {
-        uint8 firstYearPercent;
-        uint8 secondYearPercent;
-        uint8 thirdYearPercent;
-        uint8 finalYearPercent;
+        uint firstYearPercent;
+        uint secondYearPercent;
+        uint thirdYearPercent;
+        uint finalYearPercent;
     }
 
     struct Certificate {
         string certificateId;
+        string imageHash;
         address ownerAddress;
         uint tokenId;
         string claimedDate;
@@ -107,7 +108,7 @@ contract Certify is ERC721 {
         string stuId;
         address stuWallet;
         string stuName;
-        uint8 enrolledYear;
+        uint enrolledYear;
         uint enrolledIndex;
         string enrolledProgram;
         bool isGraduated;
@@ -142,8 +143,7 @@ contract Certify is ERC721 {
         string memory _studentId,
         string memory _stuName,
         address _stuWallet,
-        string memory,
-        uint8 _enrolledYear,
+        uint _enrolledYear,
         string memory _enrolledProgram
     ) public onlyAdmin {
         require(
@@ -157,6 +157,7 @@ contract Certify is ERC721 {
 
         students[_studentId].stuName = _stuName;
         students[_studentId].enrolledYear = _enrolledYear;
+        students[_studentId].stuId = _studentId;
 
         students[_studentId].enrolledProgram = _enrolledProgram;
         students[_studentId].stuWallet = _stuWallet;
@@ -215,7 +216,9 @@ contract Certify is ERC721 {
 
     function addStudentCertificate(
         string memory _studentId,
-        string memory _certificateId
+        string memory _certificateId,
+        string memory _imageHash,
+        string memory _generatedDate
     ) public onlyAdmin {
         //certificate dispatch vaepachi ko tokenID, ipfs bata .... tyo pani aaucha .. and we set it... similarly, nft pani release garincha
         require(
@@ -231,6 +234,8 @@ contract Certify is ERC721 {
         uint _finalPercentage = getFinalPercentage(_studentId);
         studentCertificates[_certificateId].ownerAddress = students[_studentId]
             .stuWallet;
+        studentCertificates[_certificateId].imageHash = _imageHash;
+        studentCertificates[_certificateId].generatedDate = _generatedDate;
         studentCertificates[_certificateId].certificateId = _certificateId;
         students[_studentId].isGraduated = true;
         studentCertificates[_certificateId].tokenId = students[_studentId]
@@ -256,7 +261,7 @@ contract Certify is ERC721 {
     function buildImage(uint256 _tokenId) private view returns (string memory) {
         string memory _studentId = studentWallets[tokenOwners[_tokenId]];
         string memory _studentName = students[_studentId].stuName;
-        uint8 _enrolledYear = students[_studentId].enrolledYear;
+        uint _enrolledYear = students[_studentId].enrolledYear;
 
         return
             string(
@@ -286,7 +291,7 @@ contract Certify is ERC721 {
     ) private view returns (string memory) {
         string memory _studentId = studentWallets[tokenOwners[_tokenId]];
         string memory _studentName = students[_studentId].stuName;
-        uint8 _enrolledYear = students[_studentId].enrolledYear;
+        uint _enrolledYear = students[_studentId].enrolledYear;
 
         return
             string(

@@ -19,16 +19,11 @@ const studentSchema = mongoose.Schema(
         },
         results: [
             {
-                year: Number,
-                subjects: [
-                    {
-                        subject: {
-                            type: mongoose.Schema.Types.ObjectId,
-                            ref: "Subject",
-                        },
-                        marks: { type: Number },
-                    },
-                ],
+                subject: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: "Subject",
+                },
+                marks: { type: Number },
             },
         ],
         certificate: {

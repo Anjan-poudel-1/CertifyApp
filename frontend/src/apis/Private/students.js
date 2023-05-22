@@ -50,6 +50,19 @@ export const updateExistingUser = async (data, query, signal) => {
     }
 };
 
+export const updateExistingStudent = async (data, query, signal) => {
+    try {
+        return await publicRequest(
+            `students${query && query}`,
+            "PUT",
+            data,
+            signal
+        );
+    } catch (err) {
+        throw err;
+    }
+};
+
 export const changePassword = async (data, query, signal) => {
     try {
         return await publicRequest(

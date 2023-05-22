@@ -4,7 +4,7 @@ import { publicRequest } from "../base";
 export const fetchStudentResult = async (data, query, signal) => {
     try {
         return await publicRequest(
-            `students/${data.id}/results${query && query}`,
+            `studentres/${data.id}/results${query && query}`,
             "GET",
             data,
             signal
@@ -20,7 +20,7 @@ export const createStudentResult = async (data, query, signal) => {
 
     try {
         return await publicRequest(
-            `students/${tempData.id}/results${query && query}`,
+            `studentres/${tempData.id}/results${query && query}`,
             "POST",
             data,
             signal
@@ -39,7 +39,7 @@ export const updateStudentResult = async (data, query, signal) => {
 
     try {
         return await publicRequest(
-            `students/${studentId}/results/${resultId}`,
+            `studentres/${studentId}/results/${resultId}`,
             "PUT",
             data,
             signal
