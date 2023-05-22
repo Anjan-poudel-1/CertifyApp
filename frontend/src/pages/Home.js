@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 import { useEth } from "../contexts/EthContext";
 import { fetchStudentData } from "../apis/Private/students";
 import { fetchProgramsData } from "../apis/Private/programs";
+import isEmpty from "../helpers/isEmpty";
 
 function Home() {
     const [loading, setLoading] = useState(false);
@@ -46,7 +47,28 @@ function Home() {
                         studentOriginalId: res.json.student._id,
                     });
 
-                    setCertificateDetails({ ...res.json.student.certificate });
+                    // Get certificate data from chain....
+
+                    const certificateId = res.json.student.certificate._id;
+                    console.log("certificateid", certificateId);
+                    console.log(state.contract);
+                    let _certificateDetails =
+                        await state.contract.studentCertificates(certificateId);
+                    let _studentChainDetails = await state.contract.students(
+                        res.json.student.studentId
+                    );
+
+                    _certificateDetails = {
+                        certificateId: _certificateDetails[0],
+                        imageHash: _certificateDetails[1],
+                        ownerAddress: _certificateDetails[2],
+                        generatedDate: _certificateDetails[4],
+                        hasClaimed: _studentChainDetails[7],
+                    };
+                    console.log("_certificateDetails", _certificateDetails);
+
+                    setCertificateDetails({ ..._certificateDetails });
+                    console.log("This should be called after stars");
                     setAcademicData({
                         name: res.json.student.enrolledProgram.name,
                         enrolledYear: res.json.student.enrolledYear,
@@ -85,7 +107,9 @@ function Home() {
                     toast.error("Unable to fetch student Data");
                 }
             })
-            .catch((err) => {})
+            .catch((err) => {
+                console.log(err);
+            })
             .finally(() => {
                 setLoading(false);
             });
@@ -106,10 +130,33 @@ function Home() {
     };
 
     useEffect(() => {
-        getUserDetails();
-    }, []);
+        if (state && state.contract) {
+            getUserDetails();
+        }
+    }, [state.contract]);
     const getMarks = (subjectId) => {
         return subjects[subjectId];
+    };
+
+    const downLoadCertificate = (link) => {
+        var a = document.createElement("a");
+        a.href = link;
+        a.download = "image.png";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    };
+
+    const claimNFT = async () => {
+        console.log("Clicked to claim nft");
+        await state.contract
+            .claimNFT()
+            .then((res) => {
+                toast.success("NFT has been claimed");
+            })
+            .catch((err) => {
+                toast.error(err.reason);
+            });
     };
     return (
         <div className="page container">
@@ -258,6 +305,70 @@ function Home() {
                     </Card>
                 </Col>
             </Row>
+
+            {certificateDetails &&
+                certificateDetails.generatedDate &&
+                !isEmpty(certificateDetails.generatedDate) && (
+                    <Row style={{ margin: "2rem 0" }}>
+                        <Col>
+                            <Card>
+                                <Card.Body
+                                    style={{ padding: "30px" }}
+                                    className="input-card"
+                                >
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "space-between",
+                                            marginBottom: "1rem",
+                                        }}
+                                    >
+                                        <h5> Academic Certificate </h5>
+                                    </div>
+
+                                    <div>
+                                        <b>
+                                            {isEmpty(
+                                                certificateDetails.hasClaimed
+                                            )
+                                                ? "Your Certificate and NFT has been issued"
+                                                : "You have already accepted your token"}
+                                        </b>
+
+                                        <div className="student-certificate-image">
+                                            <img
+                                                src={`https://ipfs.filebase.io/ipfs/${certificateDetails.imageHash}`}
+                                            />
+                                            <div className="student-certificate-image__buttons">
+                                                <button
+                                                    className="btn btn-primary"
+                                                    onClick={() =>
+                                                        downLoadCertificate(
+                                                            `https://ipfs.filebase.io/ipfs/${certificateDetails.imageHash}`
+                                                        )
+                                                    }
+                                                >
+                                                    Download Certificate
+                                                </button>
+                                                {isEmpty(
+                                                    certificateDetails.hasClaimed
+                                                ) && (
+                                                    <button
+                                                        className="btn btn-primary"
+                                                        onClick={claimNFT}
+                                                    >
+                                                        Claim NFT
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                    </Row>
+                )}
         </div>
     );
 }

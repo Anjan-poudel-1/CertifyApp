@@ -100,7 +100,6 @@ contract Certify is ERC721 {
         string imageHash;
         address ownerAddress;
         uint tokenId;
-        string claimedDate;
         string generatedDate;
     }
 
@@ -113,7 +112,7 @@ contract Certify is ERC721 {
         string enrolledProgram;
         bool isGraduated;
         bool hasClaimedCertificate;
-        Certificate stuCertificate;
+        string certificateId;
     }
 
     mapping(address => string) public studentWallets; // here , wallet address is mapped to student id
@@ -195,8 +194,8 @@ contract Certify is ERC721 {
             "Student doesnot exist"
         );
         require(
-            !students[_studentId].hasClaimedCertificate,
-            "Cannot modify marks once certificate has been claimed"
+            !students[_studentId].isGraduated,
+            "Cannot modify marks once certificate has been deployed"
         );
         studentAcademics[_studentId] = _studentAcademics;
     }
@@ -222,8 +221,7 @@ contract Certify is ERC721 {
     ) public onlyAdmin {
         //certificate dispatch vaepachi ko tokenID, ipfs bata .... tyo pani aaucha .. and we set it... similarly, nft pani release garincha
         require(
-            bytes(students[_studentId].stuCertificate.certificateId).length ==
-                0,
+            bytes(students[_studentId].certificateId).length == 0,
             "Certificate already generated"
         );
         require(
@@ -238,6 +236,8 @@ contract Certify is ERC721 {
         studentCertificates[_certificateId].generatedDate = _generatedDate;
         studentCertificates[_certificateId].certificateId = _certificateId;
         students[_studentId].isGraduated = true;
+        students[_studentId].certificateId = _certificateId;
+
         studentCertificates[_certificateId].tokenId = students[_studentId]
             .enrolledIndex;
     }
@@ -248,7 +248,8 @@ contract Certify is ERC721 {
             "ONly student allowed to mint"
         );
         string memory _stuId = studentWallets[msg.sender];
-        uint _tokenId = students[_stuId].stuCertificate.tokenId;
+        string memory _stuCertificateId = students[_stuId].certificateId;
+        uint _tokenId = studentCertificates[_stuCertificateId].tokenId;
         require(_tokenId > 0, "Not eligible to claim"); // Admin has not set token id yet.
         require(!students[_stuId].hasClaimedCertificate, "NFT Already Claimed");
 
