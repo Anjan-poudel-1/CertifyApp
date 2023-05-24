@@ -1,4 +1,22 @@
 .verify-certificate {
     width: 60%;
     margin: 3rem auto 2rem auto;
+
+    &__certificateDetails {
+        margin: 2rem 0;
+
+        &__image {
+            margin: 2rem 0;
+            max-width: 500px;
+            img {
+                width: 100%;
+            }
+        }
+
+        &__student,
+        &__marks {
+            padding: 30px 20px;
+            margin: 1rem 0;
+        }
+    }
 }

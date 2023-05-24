@@ -4,3 +4,25 @@
     justify-content: end;
     margin-top: 1rem;
 }
+
+.student-certificate-image {
+    margin: 1rem 0;
+
+    img {
+        max-width: 500px;
+
+        text-align: center;
+        margin: 1rem auto;
+
+        @include media-breakpoint-down(md) {
+            width: 100%;
+        }
+    }
+
+    &__buttons {
+        display: flex;
+        margin-top: 1rem;
+        gap: 1rem;
+        align-items: center;
+    }
+}

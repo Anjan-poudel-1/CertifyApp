@@ -271,15 +271,10 @@ contract Certify is ERC721 {
                     Base64.encode(
                         bytes(
                             abi.encodePacked(
-                                '<svg width="356" height="590" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">',
-                                '<image xlink:href="https://ipfs.filebase.io/ipfs/QmZP3Gy9H8zwF83BiigkUiR9UcA1prQgpxjfrDwPVwLE1F" x="0" y="0" width="356" height="590" />',
+                                '<svg width="359" height="594" viewBox="0 0 359 594" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2.99994" width="356" height="590" fill="#F1F1F1"/><path d="M1 0L356 25.813L1 87V0Z" fill="#B28069"/><path d="M355.5 4V92L0.5 4H355.5Z" fill="#BFA294"/><path d="M356.985 593.232L2.2353 564.184L357.778 506.236L356.985 593.232Z" fill="#B28069"/><path d="M2.01822 587.996L2.82046 500L357.003 591.233L2.01822 587.996Z" fill="#BFA294"/><line x1="40.9999" y1="399" x2="331" y2="399" stroke="black"  stroke-width="2"/><text x="16%" y="30%" fill="black"  font-weight="600" font-size="32" >Imperial College</text><text x="40%" y="73%" fill="black" font-size="22" >Alumni</text>',
                                 '<text x="50%" y="64.5%" dominant-baseline="middle" fill="namaste" text-anchor="middle" font-size="25">',
                                 _studentName,
-                                "</text>",
-                                '<text x="63%" y="80%" dominant-baseline="middle" fill="namaste" text-anchor="middle" font-size="20" font-weight="600">',
-                                _enrolledYear,
-                                "</text>",
-                                "</svg>"
+                                "</text></svg>"
                             )
                         )
                     )
@@ -301,9 +296,7 @@ contract Certify is ERC721 {
                     Base64.encode(
                         bytes(
                             abi.encodePacked(
-                                '{"BatchOf":"',
-                                _enrolledYear,
-                                '", "studentName":"',
+                                '{"studentName":"',
                                 _studentName,
                                 '", "image": "',
                                 buildImage(_tokenId),

@@ -129,6 +129,11 @@ function Home() {
         return toReturn;
     };
 
+    const viewMyNFT = () => {
+        let url = "https://testnets.opensea.io/account";
+        window.open(url, "_blank");
+    };
+
     useEffect(() => {
         if (state && state.contract) {
             getUserDetails();
@@ -141,6 +146,7 @@ function Home() {
     const downLoadCertificate = (link) => {
         var a = document.createElement("a");
         a.href = link;
+        a.target = "_blank";
         a.download = "image.png";
         document.body.appendChild(a);
         a.click();
@@ -351,9 +357,16 @@ function Home() {
                                                 >
                                                     Download Certificate
                                                 </button>
-                                                {isEmpty(
+                                                {!isEmpty(
                                                     certificateDetails.hasClaimed
-                                                ) && (
+                                                ) ? (
+                                                    <button
+                                                        onClick={viewMyNFT}
+                                                        className="btn btn-primary"
+                                                    >
+                                                        View My NFT
+                                                    </button>
+                                                ) : (
                                                     <button
                                                         className="btn btn-primary"
                                                         onClick={claimNFT}
