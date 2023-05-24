@@ -392,7 +392,7 @@ app.get("/graph-data", async (req, res) => {
         name: "Students Enrolled per Year",
         description: "Number of students enrolled in each year",
         labels: [],
-        datasets: [],
+        datasets: { data: [] },
     };
 
     const enrolledResults = await Student.aggregate([
@@ -400,16 +400,18 @@ app.get("/graph-data", async (req, res) => {
     ]);
     enrolledResults.forEach((result) => {
         enrolledData.labels.push(result._id);
-        enrolledData.datasets[0].data.push(result.count);
+
+        enrolledData.datasets.data &&
+            enrolledData.datasets.data.push(result.count);
     });
     data.push(enrolledData);
 
     // Certificates generated per year
     const certificateData = {
-        name: "Certificates Generated per Year",
-        description: "Number of certificates generated each year",
+        name: "Students Graduated Per Year",
+        description: "Number of students graduated  generated per year",
         labels: [],
-        datasets: [],
+        datasets: { data: [] },
     };
 
     const certificateResults = await Certificate.aggregate([
@@ -417,8 +419,11 @@ app.get("/graph-data", async (req, res) => {
     ]);
     certificateResults.forEach((result) => {
         certificateData.labels.push(result._id);
-        certificateData.datasets[0].data.push(result.count);
+
+        certificateData.datasets.data &&
+            certificateData.datasets.data.push(result.count);
     });
+    console.log("certificateData", certificateData);
     data.push(certificateData);
 
     // Get number of students in each program
@@ -426,7 +431,7 @@ app.get("/graph-data", async (req, res) => {
         name: "Number of Students per Program",
         description: "Number of students enrolled in each program",
         labels: [],
-        datasets: [],
+        datasets: { data: [] },
     };
 
     const programResults = await Program.aggregate([
@@ -448,7 +453,9 @@ app.get("/graph-data", async (req, res) => {
     ]);
     programResults.forEach((result) => {
         programData.labels.push(result._id);
-        programData.datasets[0].data.push(result.count);
+
+        programData.datasets.data &&
+            programData.datasets.data.push(result.count);
     });
     data.push(programData);
 
