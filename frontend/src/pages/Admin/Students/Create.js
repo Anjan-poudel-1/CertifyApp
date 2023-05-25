@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Row, Col, Card, Table, Image } from "react-bootstrap";
 import {
     addStudentData,
+    deleteExistingStudent,
     fetchStudentData,
 } from "../../../apis/Private/students";
 import { useNavigate } from "react-router";
@@ -70,6 +71,9 @@ function Create() {
                         })
                         .catch((err) => {
                             toast.error(err.reason || err.message);
+                            deleteExistingStudent(null, `/${studentId}`)
+                                .then((res) => {})
+                                .catch((err) => {});
                         });
                 } else {
                     toast.error("Could not add the student");
@@ -228,6 +232,7 @@ function Create() {
                                                 });
                                             }}
                                             as="select"
+                                            isInvalid={!!errors.enrolledProgram}
                                         >
                                             <option value="" disabled>
                                                 Choose Program
@@ -247,6 +252,9 @@ function Create() {
                                                 );
                                             })}
                                         </Form.Control>
+                                        <Form.Control.Feedback type="invalid">
+                                            {errors.enrolledProgram}
+                                        </Form.Control.Feedback>
                                     </Form.Group>
                                 </Col>
                             </Row>

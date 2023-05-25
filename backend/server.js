@@ -128,7 +128,7 @@ app.post("/users", async (req, res) => {
 
         let message = {
             from: "certifyapp092@gmail.com", // replace with sender email address
-            to: "panjan19@tbc.edu.np", // replace with recipient email address
+            to: `${newUser.email}`, // replace with recipient email address
             subject: "Student Registration Successful", // replace with subject of the email
             html: `
         <div>
@@ -207,6 +207,18 @@ app.put("/students/:id", async (req, res) => {
             .populate("results.subject");
 
         res.status(200).json(updatedStudent);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+app.delete("/students/:id", async (req, res) => {
+    try {
+        const deletedStudent = await Student.findOneAndDelete({
+            studentId: id,
+        });
+
+        res.status(200).json({ message: "Successfully deleted" });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

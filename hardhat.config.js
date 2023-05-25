@@ -24,6 +24,10 @@ module.exports = {
             url: `https://eth-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
             accounts: [process.env.SEPOLIA_PRIVATE_KEY],
         },
+        arbitrum: {
+            url: `https://arb-goerli.g.alchemy.com/v2/${process.env.ALCHEMY_ARBITRUM_API_KEY}`,
+            accounts: [process.env.SEPOLIA_PRIVATE_KEY],
+        },
         ganache: {
             url: "HTTP://127.0.0.1:7545",
             accounts: [process.env.GANACHE_PRIVATE_KEY],
@@ -32,6 +36,7 @@ module.exports = {
     etherscan: {
         apiKey: {
             sepolia: process.env.ETHERSCAN_SEPOLIA_KEY,
+            arbitrum: process.env.ETHERSCAN_ARBITRUM_KEY,
         },
     },
 };

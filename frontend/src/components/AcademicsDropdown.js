@@ -29,18 +29,6 @@ function AcademicsDropdown({ show, setShow, data }) {
             >
                 <div className="account-dropdown__list__data">Programs</div>
             </div>
-            <div
-                className="account-dropdown__list"
-                onClick={() => moveToPage("results")}
-            >
-                <div className="account-dropdown__list__data">Results</div>
-            </div>
-            <div
-                className="account-dropdown__list"
-                onClick={() => moveToPage("certificate")}
-            >
-                <div className="account-dropdown__list__data">Certificate</div>
-            </div>
         </div>
     );
 }

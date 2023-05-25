@@ -63,6 +63,19 @@ export const updateExistingStudent = async (data, query, signal) => {
     }
 };
 
+export const deleteExistingStudent = async (data, query, signal) => {
+    try {
+        return await publicRequest(
+            `students${query && query}`,
+            "DELETE",
+            data,
+            signal
+        );
+    } catch (err) {
+        throw err;
+    }
+};
+
 export const changePassword = async (data, query, signal) => {
     try {
         return await publicRequest(
