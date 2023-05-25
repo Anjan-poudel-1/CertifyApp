@@ -463,7 +463,7 @@ app.get("/graph-data", async (req, res) => {
 });
 
 app.post("/login", async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, walletAddress } = req.body;
     res.setHeader("Content-Type", "application/json");
     // Check if the email and password are valid
     const user = await User.findOne({ email }).populate("student");
@@ -478,6 +478,13 @@ app.post("/login", async (req, res) => {
         return res.status(401).json({
             message: "Invalid email or password",
             errors: { password: "Password didnot match" },
+        });
+    }
+    const isWalletCorrect = user.walletAddress == walletAddress;
+
+    if (!isWalletCorrect) {
+        return res.status(401).json({
+            message: "Signed In with Different Wallet",
         });
     }
 

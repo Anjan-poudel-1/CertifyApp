@@ -82,11 +82,39 @@ library Base64 {
     }
 }
 
+library UintToString {
+    function toString(uint256 value) internal pure returns (string memory) {
+        if (value == 0) {
+            return "0";
+        }
+
+        uint256 temp = value;
+        uint256 digits;
+
+        while (temp != 0) {
+            digits++;
+            temp /= 10;
+        }
+
+        bytes memory buffer = new bytes(digits);
+        uint256 index = digits - 1;
+
+        while (value != 0) {
+            buffer[index--] = bytes1(uint8(48 + (value % 10)));
+            value /= 10;
+        }
+
+        return string(buffer);
+    }
+}
+
 contract Certify is ERC721 {
     //here owner is the administrator....
     uint public totalStudentsEnrolled = 0;
     uint public usedDecimalPoints = 2;
     address public admin;
+
+    using UintToString for uint256;
 
     struct Academics {
         uint firstYearPercent;
@@ -136,6 +164,12 @@ contract Certify is ERC721 {
     function changeAdmin(address newAdmin) public onlyAdmin {
         require(newAdmin != address(0), "Provide a valid adddress");
         admin = newAdmin;
+    }
+
+    function convertToString(
+        uint256 number
+    ) public pure returns (string memory) {
+        return number.toString();
     }
 
     function enrollStudent(
@@ -229,7 +263,6 @@ contract Certify is ERC721 {
             "Certificate has already been assigned"
         );
 
-        uint _finalPercentage = getFinalPercentage(_studentId);
         studentCertificates[_certificateId].ownerAddress = students[_studentId]
             .stuWallet;
         studentCertificates[_certificateId].imageHash = _imageHash;
@@ -263,7 +296,7 @@ contract Certify is ERC721 {
         string memory _studentId = studentWallets[tokenOwners[_tokenId]];
         string memory _studentName = students[_studentId].stuName;
         uint _enrolledYear = students[_studentId].enrolledYear;
-
+        string memory numberString = convertToString(_enrolledYear); // Convert uint to string
         return
             string(
                 abi.encodePacked(
@@ -271,9 +304,10 @@ contract Certify is ERC721 {
                     Base64.encode(
                         bytes(
                             abi.encodePacked(
-                                '<svg width="359" height="594" viewBox="0 0 359 594" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2.99994" width="356" height="590" fill="#F1F1F1"/><path d="M1 0L356 25.813L1 87V0Z" fill="#B28069"/><path d="M355.5 4V92L0.5 4H355.5Z" fill="#BFA294"/><path d="M356.985 593.232L2.2353 564.184L357.778 506.236L356.985 593.232Z" fill="#B28069"/><path d="M2.01822 587.996L2.82046 500L357.003 591.233L2.01822 587.996Z" fill="#BFA294"/><line x1="40.9999" y1="399" x2="331" y2="399" stroke="black"  stroke-width="2"/><text x="16%" y="30%" fill="black"  font-weight="600" font-size="32" >Imperial College</text><text x="40%" y="73%" fill="black" font-size="22" >Alumni</text>',
-                                '<text x="50%" y="64.5%" dominant-baseline="middle" fill="namaste" text-anchor="middle" font-size="25">',
+                                '<svg width="359" height="594" viewBox="0 0 359 594" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2.99994" width="356" height="590" fill="#F1F1F1"/><path d="M1 0L356 25.813L1 87V0Z" fill="#B28069"/><path d="M355.5 4V92L0.5 4H355.5Z" fill="#BFA294"/><path d="M356.985 593.232L2.2353 564.184L357.778 506.236L356.985 593.232Z" fill="#B28069"/><path d="M2.01822 587.996L2.82046 500L357.003 591.233L2.01822 587.996Z" fill="#BFA294"/><line x1="40.9999" y1="399" x2="331" y2="399" stroke="black"  stroke-width="2"/><text x="16%" y="30%" fill="black"  font-weight="600" font-size="32" >Imperial College</text><text x="40%" y="73%" fill="black" font-size="22" >Alumni</text><text x="50%" y="64.5%" fill="black" text-anchor="middle" font-size="25">',
                                 _studentName,
+                                '</text><text x="33%" y="82.5%" fill="black" font-weight="600"  font-size="18">Batch of ',
+                                numberString,
                                 "</text></svg>"
                             )
                         )
@@ -288,7 +322,7 @@ contract Certify is ERC721 {
         string memory _studentId = studentWallets[tokenOwners[_tokenId]];
         string memory _studentName = students[_studentId].stuName;
         uint _enrolledYear = students[_studentId].enrolledYear;
-
+        string memory numberString = convertToString(_enrolledYear); // Convert uint to string
         return
             string(
                 abi.encodePacked(
@@ -298,7 +332,9 @@ contract Certify is ERC721 {
                             abi.encodePacked(
                                 '{"studentName":"',
                                 _studentName,
-                                '", "image": "',
+                                '"," "batch":"',
+                                numberString,
+                                '",image": "',
                                 buildImage(_tokenId),
                                 '"}'
                             )
