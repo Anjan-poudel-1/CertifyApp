@@ -87,10 +87,10 @@ function NavBar({}) {
                             </div>
                         )}
 
-                    {state &&
+                    {/* {state &&
                         state.userState &&
                         state.userState.isLoggedIn &&
-                        !state.userState.user.isAdmin && <div>My Studies</div>}
+                        !state.userState.user.isAdmin && <div>My Studies</div>} */}
                 </div>
                 <div className="navbar__right">
                     {/* If account logged in , show profile else show wallet address */}

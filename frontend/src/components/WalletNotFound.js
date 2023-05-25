@@ -8,6 +8,9 @@ function WalletNotFound() {
         <div className="page absolute-center-page">
             <div className="absolute-center-page__content">
                 <CompanyBranding />
+                <p style={{ opacity: "0.75" }}>
+                    Empowering Academic Credentials and Ensuring Trust
+                </p>
                 <div className="wallet-not-connected">
                     <div className="wallet-not-connected__heading">
                         You do not have an ethereum wallet

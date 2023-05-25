@@ -30,7 +30,12 @@ function Login() {
         if (isEmpty(_errors)) {
             setLoading(true);
             const controller = new AbortController();
-            await userLogin({ ...initialLoginValues }, "", controller.signal)
+            const walletAddress = state.accounts;
+            await userLogin(
+                { ...initialLoginValues, walletAddress },
+                "",
+                controller.signal
+            )
                 .then((res) => {
                     console.log(res);
                     if (res.response.ok) {
