@@ -40,11 +40,15 @@ function NavBar({}) {
         setOpenAccounts(false);
     }, [location.pathname]);
 
+    console.log("State", state);
+    console.log(
+        "process.env.REACT_APP_DEPLOYED_CHAINID",
+        process.env.REACT_APP_DEPLOYED_CHAINID
+    );
     return (
         <div className="navbar ">
             {state.networkID &&
-                state.networkID.toString() !==
-                    `${process.env.REACT_APP_DEPLOYED_CHAINID}` && (
+                state.networkID != process.env.REACT_APP_DEPLOYED_CHAINID && (
                     <IncorrectChain />
                 )}
             <div className=" navbar-container container">
