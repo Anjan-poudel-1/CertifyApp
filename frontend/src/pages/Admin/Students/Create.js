@@ -62,7 +62,7 @@ function Create() {
                             studentId,
                             studentData.name,
                             studentData.walletAddress,
-                            parseInt(studentData.enrolledYear),
+                            studentData.enrolledYear,
                             studentData.enrolledProgram
                         )
                         .then((res) => {

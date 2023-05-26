@@ -82,39 +82,11 @@ library Base64 {
     }
 }
 
-library UintToString {
-    function toString(uint256 value) internal pure returns (string memory) {
-        if (value == 0) {
-            return "0";
-        }
-
-        uint256 temp = value;
-        uint256 digits;
-
-        while (temp != 0) {
-            digits++;
-            temp /= 10;
-        }
-
-        bytes memory buffer = new bytes(digits);
-        uint256 index = digits - 1;
-
-        while (value != 0) {
-            buffer[index--] = bytes1(uint8(48 + (value % 10)));
-            value /= 10;
-        }
-
-        return string(buffer);
-    }
-}
-
 contract Certify is ERC721 {
     //here owner is the administrator....
     uint public totalStudentsEnrolled = 0;
     uint public usedDecimalPoints = 2;
     address public admin;
-
-    using UintToString for uint256;
 
     struct Academics {
         uint firstYearPercent;
@@ -135,7 +107,7 @@ contract Certify is ERC721 {
         string stuId;
         address stuWallet;
         string stuName;
-        uint enrolledYear;
+        string enrolledYear;
         uint enrolledIndex;
         string enrolledProgram;
         bool isGraduated;
@@ -166,17 +138,11 @@ contract Certify is ERC721 {
         admin = newAdmin;
     }
 
-    function convertToString(
-        uint256 number
-    ) public pure returns (string memory) {
-        return number.toString();
-    }
-
     function enrollStudent(
         string memory _studentId,
         string memory _stuName,
         address _stuWallet,
-        uint _enrolledYear,
+        string memory _enrolledYear,
         string memory _enrolledProgram
     ) public onlyAdmin {
         require(
@@ -283,9 +249,10 @@ contract Certify is ERC721 {
         string memory _stuId = studentWallets[msg.sender];
         string memory _stuCertificateId = students[_stuId].certificateId;
         uint _tokenId = studentCertificates[_stuCertificateId].tokenId;
+
         require(_tokenId > 0, "Not eligible to claim"); // Admin has not set token id yet.
         require(!students[_stuId].hasClaimedCertificate, "NFT Already Claimed");
-
+        tokenOwners[_tokenId] = msg.sender;
         _safeMint(msg.sender, _tokenId);
         students[_stuId].hasClaimedCertificate = true;
     }
@@ -293,10 +260,11 @@ contract Certify is ERC721 {
     // Getters .. to get data
 
     function buildImage(uint256 _tokenId) private view returns (string memory) {
-        string memory _studentId = studentWallets[tokenOwners[_tokenId]];
+        address _studentAddress = tokenOwners[_tokenId];
+        string memory _studentId = studentWallets[_studentAddress];
         string memory _studentName = students[_studentId].stuName;
-        uint _enrolledYear = students[_studentId].enrolledYear;
-        string memory numberString = convertToString(_enrolledYear); // Convert uint to string
+        string memory _enrolledYear = students[_studentId].enrolledYear;
+
         return
             string(
                 abi.encodePacked(
@@ -307,7 +275,7 @@ contract Certify is ERC721 {
                                 '<svg width="359" height="594" viewBox="0 0 359 594" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2.99994" width="356" height="590" fill="#F1F1F1"/><path d="M1 0L356 25.813L1 87V0Z" fill="#B28069"/><path d="M355.5 4V92L0.5 4H355.5Z" fill="#BFA294"/><path d="M356.985 593.232L2.2353 564.184L357.778 506.236L356.985 593.232Z" fill="#B28069"/><path d="M2.01822 587.996L2.82046 500L357.003 591.233L2.01822 587.996Z" fill="#BFA294"/><line x1="40.9999" y1="399" x2="331" y2="399" stroke="black"  stroke-width="2"/><text x="16%" y="30%" fill="black"  font-weight="600" font-size="32" >Imperial College</text><text x="40%" y="73%" fill="black" font-size="22" >Alumni</text><text x="50%" y="64.5%" fill="black" text-anchor="middle" font-size="25">',
                                 _studentName,
                                 '</text><text x="33%" y="82.5%" fill="black" font-weight="600"  font-size="18">Batch of ',
-                                numberString,
+                                _enrolledYear,
                                 "</text></svg>"
                             )
                         )
@@ -321,8 +289,8 @@ contract Certify is ERC721 {
     ) private view returns (string memory) {
         string memory _studentId = studentWallets[tokenOwners[_tokenId]];
         string memory _studentName = students[_studentId].stuName;
-        uint _enrolledYear = students[_studentId].enrolledYear;
-        string memory numberString = convertToString(_enrolledYear); // Convert uint to string
+        string memory _enrolledYear = students[_studentId].enrolledYear;
+
         return
             string(
                 abi.encodePacked(
@@ -330,11 +298,11 @@ contract Certify is ERC721 {
                     Base64.encode(
                         bytes(
                             abi.encodePacked(
-                                '{"studentName":"',
+                                '{"name":"',
                                 _studentName,
-                                '"," "batch":"',
-                                numberString,
-                                '",image": "',
+                                '", "enrolledYear":"',
+                                _enrolledYear,
+                                '", "image": "',
                                 buildImage(_tokenId),
                                 '"}'
                             )

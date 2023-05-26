@@ -24,7 +24,7 @@ function EthProvider({ children }) {
             const { abi } = artifact;
             let address, contract;
             try {
-                address = "0xFFcEA8003Ba2Ef7b1fA9ea915c9EB43bE9fd7887";
+                address = "0x07A35164a8260CF6627486C79dF7b5c119D2c1a9";
                 console.log(address, abi, provider);
                 contract = new ethers.Contract(address, abi, accountsSigner);
             } catch (err) {
